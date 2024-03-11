@@ -16,7 +16,7 @@ public interface ShoppingCartSItemervice {
 
     ShoppingCartItem updateItemInCart(Product product, int quantity, User customer);
 
-    boolean deleteItemFromCart(Product product, User user);
+//    boolean deleteItemFromCart(Product product, User user);
 
     ShoppingCartItem findCartItem(Set<Product> cartItems, Long productId);
 

@@ -2,11 +2,10 @@ package com.bezkoder.springjwt.Service.Impl;
 
 import com.bezkoder.springjwt.Service.ProductService;
 
-import com.bezkoder.springjwt.entities.class4getpicture;
+import com.bezkoder.springjwt.Service.SizeService;
+import com.bezkoder.springjwt.entities.*;
 import com.bezkoder.springjwt.payload.response.ProductRespone;
 import com.bezkoder.springjwt.payload.request.ProductRequest;
-import com.bezkoder.springjwt.entities.Category;
-import com.bezkoder.springjwt.entities.Product;
 import com.bezkoder.springjwt.repository.CategoryRepository;
 import com.bezkoder.springjwt.repository.ProductRepository;
 import org.apache.commons.lang3.ObjectUtils;
@@ -19,10 +18,7 @@ import org.springframework.util.ReflectionUtils;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -32,6 +28,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private SizeService sizeService;
 
 
     @Override
@@ -51,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
                     productDTO.setUpdated_at(item.getUpdated_at());
                     productDTO.setWarehouse(item.getWarehouse());
                     productDTO.setDiscount(item.getDiscount());
-                    productDTO.setSize(item.getSize());
+                    productDTO.setSize(item.getListSize());
                     productDTO.setBase64(item.getBase64());
                     productDTO.setCategory(item.getCategory().getCategoryname());
                     return productDTO;
@@ -81,7 +80,37 @@ public class ProductServiceImpl implements ProductService {
                     product.setUpdated_at(LocalDate.now());
                     product.setWarehouse(productDTO.getWarehouse());
                     product.setDiscount(productDTO.getDiscount());
-                    product.setSize(productDTO.getSize());
+                    Set<String> sizeinput = productDTO.getSize();
+                    Set<Size> listsizes = new HashSet<>();
+
+                    if (sizeinput == null) {
+                        Size sizename = sizeService.findBySizeName(ESize.L)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        listsizes.add(sizename);
+                    }
+                    else
+                    {
+                        sizeinput.forEach(size -> {
+                            switch(size) {
+                                case "S":{
+                                    Size sizeS = sizeService.findBySizeName(ESize.S)
+                                            .orElseThrow(() -> new RuntimeException("Error: Size is not found."));
+                                    listsizes.add(sizeS);
+                                }
+                                case "M": {
+                                    Size sizeM = sizeService.findBySizeName(ESize.M)
+                                            .orElseThrow(() -> new RuntimeException("Error: Size is not found."));
+                                    listsizes.add(sizeM);
+                                }
+                                default:{
+                                    Size sizeL = sizeService.findBySizeName(ESize.L)
+                                            .orElseThrow(() -> new RuntimeException("Error: Size is not found."));
+                                    listsizes.add(sizeL);
+                                }
+                            }
+                        });
+                    }
+                    product.setListSize(listsizes);
                     product.setCategory(categoryid.get());
                     class4getpicture getpicture = new class4getpicture();
                     try
@@ -119,7 +148,37 @@ public class ProductServiceImpl implements ProductService {
                     product.setUpdated_at(LocalDate.now());
                     product.setWarehouse(productDTO.getWarehouse());
                     product.setDiscount(productDTO.getDiscount());
-                    product.setSize(productDTO.getSize());
+                    Set<String> sizeinput = productDTO.getSize();
+                    Set<Size> listsize = new HashSet<>();
+
+                    if (sizeinput == null) {
+                        Size sizename = sizeService.findBySizeName(ESize.L)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        listsize.add(sizename);
+                    }
+                    else
+                    {
+                        sizeinput.forEach(size -> {
+                            switch(size) {
+                                case "S":{
+                                    Size sizeS = sizeService.findBySizeName(ESize.S)
+                                            .orElseThrow(() -> new RuntimeException("Error: Size is not found."));
+                                    listsize.add(sizeS);
+                                }
+                                case "M": {
+                                    Size sizeM = sizeService.findBySizeName(ESize.M)
+                                            .orElseThrow(() -> new RuntimeException("Error: Size is not found."));
+                                    listsize.add(sizeM);
+                                }
+                                default:{
+                                    Size sizeL = sizeService.findBySizeName(ESize.L)
+                                            .orElseThrow(() -> new RuntimeException("Error: Size is not found."));
+                                    listsize.add(sizeL);
+                                }
+                            }
+                        });
+                    }
+                    product.setListSize(listsize);
                     product.setCategory(categoryid.get());
                     class4getpicture getpicture = new class4getpicture();
                     try {
@@ -163,9 +222,9 @@ public class ProductServiceImpl implements ProductService {
         {
             Field field = ReflectionUtils.findField(Product.class, key);
             field.setAccessible(true);
-            ReflectionUtils.setField(field,existingProduct.get(),value);
+            ReflectionUtils.setField(field, existingProduct.get(), value);
         });
-        return productRepository.save(existingProduct.get());
+            return productRepository.save(existingProduct.get());
         }
         return null;
     }

@@ -65,10 +65,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartSItemervice {
         return null;
     }
 
-    @Override
-    public boolean deleteItemFromCart(Product product, User user) {
-        return shoppingCartItemRepository.delelteproductinshoppingcart(product, user);
-    }
+//    @Override
+//    public boolean deleteItemFromCart(Product product, User user) {
+//        return shoppingCartItemRepository.delelteproductinshoppingcart(product, user);
+//    }
 
     @Override
     public ShoppingCartItem findCartItem(Set<Product> cartItems, Long productId) {

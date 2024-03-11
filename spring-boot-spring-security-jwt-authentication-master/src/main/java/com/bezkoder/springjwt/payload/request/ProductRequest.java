@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,13 +26,12 @@ public class ProductRequest {
 
     private int discount;
 
-    private int size;
+    private Set<String> size;
 
     private String base64;
 
     private boolean deleted;
 
     private long category;
-
 }
 

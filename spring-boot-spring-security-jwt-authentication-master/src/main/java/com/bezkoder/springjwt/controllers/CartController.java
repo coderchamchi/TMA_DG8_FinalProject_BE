@@ -73,22 +73,22 @@ public class CartController {
             return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User Not Found"));
         }
     }
-    @DeleteMapping("/deleteproduct")
-    public ResponseEntity<ResponseJson<Boolean>> deleteproduct(@RequestBody  Product product){
-        try {
-            User user =userService.findUserByUserName();
-            if (ObjectUtils.isEmpty(user)){
-                return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User Not Found"));
-            }
-            boolean check = shoppingCartService.deleteItemFromCart(product, user);
-            if (!check){
-                return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User Not Found"));
-            }
-            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.ACCEPTED, "Deleted!"));
-        }
-        catch (Exception e){
-            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User Not Found"));
-        }
-    }
+//    @DeleteMapping("/deleteproduct")
+//    public ResponseEntity<ResponseJson<Boolean>> deleteproduct(@RequestBody  Product product){
+//        try {
+//            User user =userService.findUserByUserName();
+//            if (ObjectUtils.isEmpty(user)){
+//                return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User Not Found"));
+//            }
+//            boolean check = shoppingCartService.deleteItemFromCart(product, user);
+//            if (!check){
+//                return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User Not Found"));
+//            }
+//            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.ACCEPTED, "Deleted!"));
+//        }
+//        catch (Exception e){
+//            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User Not Found"));
+//        }
+//    }
 
 }

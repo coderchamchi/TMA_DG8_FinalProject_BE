@@ -1,18 +1,13 @@
 package com.bezkoder.springjwt.payload.response;
 
-import com.bezkoder.springjwt.entities.Category;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.bezkoder.springjwt.entities.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
-
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -33,7 +28,7 @@ public class ProductRespone {
 
     private int discount;
 
-    private int size;
+    private Set<Size> size;
 
     private String base64;
 

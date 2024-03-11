@@ -16,6 +16,7 @@ import com.bezkoder.springjwt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -80,8 +81,7 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
             new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
 
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-
+//    SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUtils.generateJwtToken(authentication);
 
 
@@ -90,7 +90,8 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
             .map(item -> item.getAuthority())
             .collect(Collectors.toList());
 
-    return ResponseEntity.ok(new JwtResponse(jwt,
+    return ResponseEntity.ok(new JwtResponse(
+            jwt,
             userDetails.getId(),
             userDetails.getUsername(),
             userDetails.getEmail(),
@@ -174,16 +175,17 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
       return ResponseEntity.ok().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.OK, "Update User Success"));
   }
   @GetMapping("/all")
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<List<User>> getallUser(){
       List<User> listuser = userService.getalluser();
     return new ResponseEntity<List<User>>(listuser, HttpStatus.OK);
   }
-  @GetMapping("/user")
+  @GetMapping("/user")//thong tin tra ve FE
   public ResponseEntity<Object> getuser(){
     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     return new ResponseEntity<>(principal, HttpStatus.OK);
   }
-  @GetMapping("/userinfo")
+  @GetMapping("/userinfo")//thong tin chi tiet, cac field co trong entity user
   public ResponseEntity<User> getinfouser(){
     User user = userService.findUserByUserName();
     return new ResponseEntity<User>(user, HttpStatus.OK);

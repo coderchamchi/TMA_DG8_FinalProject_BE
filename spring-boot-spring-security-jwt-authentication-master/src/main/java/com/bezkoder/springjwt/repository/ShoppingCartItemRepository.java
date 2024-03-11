@@ -15,9 +15,9 @@ public interface ShoppingCartItemRepository extends JpaRepository<ShoppingCartIt
             nativeQuery = true)
     ArrayList<ShoppingCartItem> FindAll(Long id);
 
-    @Query(
-            value = "delete product_id from shoppingcart_item where product_id = :id and user_id = :id",
-            nativeQuery = true)
-    boolean delelteproductinshoppingcart(Product productid, User userid);
+//    @Query(
+//            value = "delete product_id from shoppingcart_item where product_id = :id and user_id = :id",
+//            nativeQuery = true)
+//    boolean delelteproductinshoppingcart(Product productid, User userid);
 
 }

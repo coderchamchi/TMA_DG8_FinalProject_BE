@@ -35,7 +35,8 @@ public class JwtUtils {
             .setIssuedAt(new Date())
             .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
             .signWith(key(), SignatureAlgorithm.HS256)
-            .compact();
+            .compact();// dòng này là nó lấy thông tin các dòng trên xong tạo ra 1 chuỗi token, cái chuỗi sau khi đăng nhập xong là trả về ấy
+
   }
   
   private Key key() {

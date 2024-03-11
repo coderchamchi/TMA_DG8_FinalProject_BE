@@ -8,7 +8,9 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Getter
@@ -45,8 +47,12 @@ public class Product {
     @Column(name ="Discount")
     private int discount;
 
-    @Column(name = "Size")
-    private int size;
+    @ManyToMany(fetch = FetchType.LAZY) // lấy product thì lấy luôn size của nó
+    @JoinTable( name = "productsize",
+            joinColumns = @JoinColumn(name = "productId"),
+            inverseJoinColumns = @JoinColumn(name = "sizeId")
+    )
+    private Set<Size> listSize = new HashSet<>();
 
     @Column(name="thumbnail")
     @Type(type = "text")
@@ -65,6 +71,10 @@ public class Product {
     @OneToMany(mappedBy = "product")
     @JsonIgnore
     private List<ShoppingCartItem> listproduct;
+
+    public Set<Size> getListSize() {
+        return listSize;
+    }
     // =new Arraylist<>() là để tránh tình trạng null exception khi thao tác với class shoppingcartitem mà chưa khởi tạo
     // tuy nhiên ở đây không có là vì ở class user đã có rồi, đây không cần phải tạo nữa
 
