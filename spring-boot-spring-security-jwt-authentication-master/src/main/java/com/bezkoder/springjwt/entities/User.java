@@ -16,34 +16,35 @@ import java.util.*;
 @Setter
 @Getter
 @Entity
-@Table(name = "User")
+
+@Table(name = "user")
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
+  @Column(name = "idUser")
   @JsonIgnore
   private Long userId;
 
-  @Column(name = "fullname", nullable = false, unique = true)
+  @Column(name = "fullName", nullable = false, unique = true)
   private String username;
 
   @Column(name = "password", nullable = false)
   @JsonIgnore
   private String password;
 
-  @Column(name = "created_at")
+  @Column(name = "createDate")
   @JsonIgnore
-  private LocalDate created;
+  private LocalDate createdDate;
 
-  @Column(name = "updated_at")
+  @Column(name = "updateDate")
   @JsonIgnore
-  private LocalDate updated;
+  private LocalDate updatedDate;
 
   @NaturalId
   @Column(name = "email", nullable = false, unique = true)
   private String email;
 
-  @Column(name ="phone_number")
+  @Column(name ="phoneNumber")
   private String phone;
 
   @Column(name = "address")
@@ -52,25 +53,27 @@ public class User {
   @Column(name = "birthday")
   private LocalDate birthday;
 
-  @Column(name="deleted")
-  private boolean deleted;
+  @Column(name="status")
+  private int status;
 
   @ManyToMany(fetch = FetchType.LAZY) // lấy user thì lấy luôn quyền của nó
   @JoinTable( name = "userrole",
-          joinColumns = @JoinColumn(name = "user_id"),
-          inverseJoinColumns = @JoinColumn(name = "role_id")
+          joinColumns = @JoinColumn(name = "idUser"),
+          inverseJoinColumns = @JoinColumn(name = "idRole")
   )
 
   private Set<Role> listRole = new HashSet<>();
 
   @OneToMany(mappedBy = "user")
   @JsonIgnore
-  private List<ShoppingCartItem> shoppingCart = new ArrayList<>();
+  private List<ShoppingCart> shoppingCart = new ArrayList<>();
   // =new Arraylist<>() là để tránh tình trạng null exception khi thao tác với class shoppingcartitem mà chưa khởi tạo
 
-  //  @OneToMany(mappedBy = "user")
-  //  @JsonIgnore
-  //  private List<Bill> listBill;
+  @OneToMany(mappedBy = "user")
+  @JsonIgnore
+  private List<Payment> listPayment;
+
+  //payment
 
   public User(String username, String encode, String email,LocalDate birthday) {
     this.username = username;
@@ -79,22 +82,11 @@ public class User {
     this.birthday=birthday;
   }
 
-  public User(String username, String password, LocalDate created, LocalDate updated, String email, String phone, String address, LocalDate birthday) {
-    this.username = username;
-    this.password = password;
-    this.created = created;
-    this.updated = updated;
-    this.email = email;
-    this.phone = phone;
-    this.address = address;
-    this.birthday = birthday;
-  }
-
-  public Long getId() {
+  public Long getUserId() {
     return userId;
   }
 
-  public void setId(Long id) {
+  public void setUserId(Long userId) {
     this.userId = userId;
   }
 }

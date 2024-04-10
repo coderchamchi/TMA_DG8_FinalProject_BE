@@ -8,10 +8,12 @@ import java.util.stream.Collectors;
 
 import com.bezkoder.springjwt.Service.Impl.UserDetailsServiceImpl;
 import com.bezkoder.springjwt.Service.RoleService;
+import com.bezkoder.springjwt.Service.ShoppingCartService;
 import com.bezkoder.springjwt.Service.UserService;
 
 import com.bezkoder.springjwt.dto.ResponseJson;
 import com.bezkoder.springjwt.dto.UserDTO;
+import com.bezkoder.springjwt.entities.ShoppingCart;
 import com.bezkoder.springjwt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -62,6 +64,9 @@ public class AuthController {
 
   @Autowired
   JwtUtils jwtUtils;
+
+  @Autowired
+  ShoppingCartService shoppingCartService;
 
 @PostMapping("/signin")
 public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest)
@@ -121,8 +126,8 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
     User user = new User( signUpRequest.getUsername(),
             encoder.encode(signUpRequest.getPassword()),
                           signUpRequest.getEmail(),birthday);
-    user.setUpdated(LocalDate.now());
-    user.setCreated(LocalDate.now());
+    user.setUpdatedDate(LocalDate.now());
+    user.setCreatedDate(LocalDate.now());
     Set<String> strRoles = signUpRequest.getRole();
     Set<Role> roles = new HashSet<>();
 
@@ -157,6 +162,7 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
 
     user.setListRole(roles);
     userService.saveOrupdate(user);
+    shoppingCartService.saveShoppingCart(user);
 
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
   }
@@ -166,7 +172,7 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
           (@PathVariable("id") Long id, @RequestBody UserDTO userDTO) {
 
       User user = userRepository.getById(id);
-      user.setUpdated(LocalDate.now());
+      user.setUpdatedDate(LocalDate.now());
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
       user.setBirthday(LocalDate.parse(userDTO.getBirthday(),formatter));
       user.setAddress(userDTO.getAddress());
@@ -190,4 +196,5 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
     User user = userService.findUserByUserName();
     return new ResponseEntity<User>(user, HttpStatus.OK);
   }
+
 }

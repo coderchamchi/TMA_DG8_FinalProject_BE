@@ -16,16 +16,17 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+
 @Entity
 @Table(name = "category")
 public class Category {
     @Id
-    @Column(name = "id")
+    @Column(name = "idCategory")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long categoryid;
+    private long categoryId;
 
-    @Column(name = "name")
-    private String categoryname;
+    @Column(name = "categoryName")
+    private String categoryName;
 
     @OneToMany(mappedBy = "category")
     @JsonIgnore

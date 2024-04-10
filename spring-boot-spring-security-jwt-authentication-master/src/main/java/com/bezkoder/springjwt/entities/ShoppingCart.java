@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,35 +15,44 @@ import java.time.LocalDate;
 @NoArgsConstructor
 
 @Entity
-@Table(name = "shoppingCartItem")
-public class ShoppingCartItem {
+@Table(name = "shoppingCart")
+public class ShoppingCart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idShoppingCartItem")
-    private Long idShoppingCartItem;
+    @Column(name = "idShoppingCart")
+    private Long idShoppingCart;
 
-    @Column(name="quantity")
-    private int quantity;
+    @Column(name="status")
+    private int status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idSize")
-    @JsonIgnore
-    private Size size;
+    @Column(name = "createDate")
+    private LocalDate createDate;
+
+    @Column(name = "updateDate")
+    private LocalDate updateDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
     //FetchType.EAGER: Điều này có nghĩa là khi bạn lấy một đối tượng ShoppingCartItem từ cơ sở dữ liệu.
     // JPA cũng sẽ tự động lấy dữ liệu của User liên quan và đưa vào trong đối tượng ShoppingCartItem.
     // Điều này có thể làm tăng hiệu suất khi thường xuyên sử dụng thông tin của User liên quan và
     // không muốn phải thực hiện thêm câu truy vấn.
-    @JoinColumn(name = "idShoppingCart")
+    @JoinColumn(name = "idUser")
     @JsonIgnore
-    private ShoppingCart shoppingCart;
+    private User user;
 
-    public Size getSize() {
-        return size;
+    @OneToMany(mappedBy = "shoppingCart")
+    @JsonIgnore
+    private List<ShoppingCartItem> listShoppingCartItem;
+
+    @OneToMany(mappedBy = "shoppingCart")
+    @JsonIgnore
+    private List<Payment> listPayment;
+
+    public Long getIdShoppingCart() {
+        return idShoppingCart;
     }
 
-    public void setSize(Size size) {
-        this.size = size;
+    public void setIdShoppingCart(Long idShoppingCart) {
+        this.idShoppingCart = idShoppingCart;
     }
 }

@@ -26,7 +26,7 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryDTO categoryDTO = new CategoryDTO();
         return categoryRepository.findById(id)
                 .map(item -> {
-                    categoryDTO.setCategoryname(item.getCategoryname());
+                    categoryDTO.setCategoryname(item.getCategoryName());
                     return categoryDTO;
                 });
     }
@@ -37,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (ObjectUtils.isNotEmpty(categoryDTO)) {
             Category category = new Category();
             try {
-                category.setCategoryname(categoryDTO.getCategoryname());
+                category.setCategoryName(categoryDTO.getCategoryname());
                 categoryRepository.save(category);
                 return true;
             } catch (Exception e) {
@@ -51,7 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
     public boolean updateCategorybyid(Long id, CategoryDTO categoryDTO) {
         if (ObjectUtils.isNotEmpty(id)){
             Category updatecategory = categoryRepository.getById(id);
-            updatecategory.setCategoryname(categoryDTO.getCategoryname());
+            updatecategory.setCategoryName(categoryDTO.getCategoryname());
             categoryRepository.save(updatecategory);
             return true;
         }

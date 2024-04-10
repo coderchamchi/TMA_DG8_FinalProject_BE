@@ -8,14 +8,19 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class SizeserviceImpl implements SizeService {
     @Autowired
     SizeRepository sizeRepository;
+
     @Override
     public Optional<Size> findBySizeName(ESize sizename) {
         return sizeRepository.findBySizeName(sizename);
     }
+
+
 }

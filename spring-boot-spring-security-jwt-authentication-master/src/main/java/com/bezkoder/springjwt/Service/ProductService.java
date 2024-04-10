@@ -1,7 +1,7 @@
 package com.bezkoder.springjwt.Service;
 
-import com.bezkoder.springjwt.payload.response.ProductRespone;
-import com.bezkoder.springjwt.payload.request.ProductRequest;
+
+import com.bezkoder.springjwt.dto.ProductSaveRequest;
 import com.bezkoder.springjwt.entities.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +17,6 @@ public interface ProductService {
     List<Product> GetAllProduct();
 
     //Get Product by id
-    Optional<ProductRespone> getProductbyid(long id);
 
     //get Product by name
     ArrayList<Product> getProductbyName(String query);
@@ -25,18 +24,11 @@ public interface ProductService {
     //get product by truong/brand ="DUE"
 //    ArrayList<Product> getProdcuctbyBrand(String query);
 
-    //Create new Product
-    boolean saveProduct(ProductRequest productDTO);
-
-    //update Product by id
-    boolean updateProductbyid(Long id, ProductRequest productRequest);
-
 
     //delete Product by id
     boolean deleteProductbyid(long id);
 
-    //delete all Product
-    boolean deleteallProduct();
+    boolean saveProduct(ProductSaveRequest productDTO);
 
     //get product by category id
     ArrayList<Product> getproductbycategory(Long id);

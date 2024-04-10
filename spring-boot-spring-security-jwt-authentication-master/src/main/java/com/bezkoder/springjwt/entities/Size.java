@@ -1,23 +1,49 @@
 package com.bezkoder.springjwt.entities;
 
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity(name = "Size")
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.List;
+
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+
+@Entity(name = "size")
 public class Size {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name ="id")
-    private int sizeId;
+    @Column(name ="idSize")
+    private long idSize;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "idProduct")
+    @JsonIgnore
+    private Product product;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "SizeName")
     private ESize sizeName;
 
-    public ESize getSizeName() {
-        return sizeName;
-    }
+    @Column(name = "price")
+    private int price;
 
-    public void setSizeName(ESize sizeName) {
-        this.sizeName = sizeName;
-    }
+    @Column(name = "updateDate")
+    private LocalDate updateDate;
+
+    @OneToMany(mappedBy = "size")
+    @JsonIgnore
+    private List<ShoppingCartItem> listShoppingCartItem;
+
+    @OneToMany(mappedBy = "size")
+    @JsonIgnore
+    private List<Payment> listPayment;
+
 }
