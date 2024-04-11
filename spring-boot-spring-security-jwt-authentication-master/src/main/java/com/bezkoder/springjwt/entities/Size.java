@@ -46,4 +46,7 @@ public class Size {
     @JsonIgnore
     private List<Payment> listPayment;
 
+    public int getPrice() {
+        return price;
+    }
 }

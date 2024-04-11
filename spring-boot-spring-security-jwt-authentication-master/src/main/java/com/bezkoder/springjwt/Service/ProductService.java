@@ -1,6 +1,8 @@
 package com.bezkoder.springjwt.Service;
 
 
+import com.bezkoder.springjwt.dto.ProductDetailById;
+import com.bezkoder.springjwt.dto.ProductListDTO;
 import com.bezkoder.springjwt.dto.ProductSaveRequest;
 import com.bezkoder.springjwt.entities.Product;
 import org.springframework.data.domain.Page;
@@ -14,9 +16,11 @@ import java.util.Optional;
 
 public interface ProductService {
     //Get all Product
-    List<Product> GetAllProduct();
+    List<ProductListDTO> GetAllProduct();
 
     //Get Product by id
+
+    ProductDetailById getProductbyid(long id);
 
     //get Product by name
     ArrayList<Product> getProductbyName(String query);

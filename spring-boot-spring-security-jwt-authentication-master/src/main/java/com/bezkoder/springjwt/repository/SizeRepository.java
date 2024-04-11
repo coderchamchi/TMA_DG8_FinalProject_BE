@@ -13,5 +13,13 @@ import java.util.Optional;
 public interface SizeRepository extends JpaRepository<Size, Long> {
     Optional<Size> findBySizeName(ESize sizeName);
 
-    ArrayList<Size> findBySizeNameOrderBySizeName(long IdProduct);
+    @Query(
+            value = "SELECT * FROM size s WHERE s.id_product = :id",
+            nativeQuery = true)
+    List<Size> findByIdProduct(long id);
+
+//    @Query(
+//            value = "",
+//            nativeQuery = true)
+//    Size findBySizeName(ESize size);
 }

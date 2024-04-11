@@ -1,9 +1,7 @@
 package com.bezkoder.springjwt.controllers;
 
 import com.bezkoder.springjwt.Service.CategoryService;
-import com.bezkoder.springjwt.dto.CategoryDTO;
-import com.bezkoder.springjwt.dto.ProductSaveRequest;
-import com.bezkoder.springjwt.dto.ResponseJson;
+import com.bezkoder.springjwt.dto.*;
 import com.bezkoder.springjwt.entities.Product;
 import com.bezkoder.springjwt.Service.ProductService;
 import org.apache.commons.lang3.ObjectUtils;
@@ -31,22 +29,21 @@ public class ProductController {
     CategoryService categoryService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<Product>> findallProduct() {
-        List<Product> listProduct = productService.GetAllProduct();
-        return new ResponseEntity<List<Product>>(listProduct, HttpStatus.OK);
+    public ResponseEntity<List<ProductListDTO>> findallProduct() {
+        List<ProductListDTO> listProduct = productService.GetAllProduct();
+        return new ResponseEntity<List<ProductListDTO>>(listProduct, HttpStatus.OK);
     }
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<ProductRespone> getProductbyid(@PathVariable("id") long id) {
-//        Optional<ProductRespone> optionalProductDTO = productService.getProductbyid(id);
-//
-//        if (optionalProductDTO.isPresent()) {
-//            ProductRespone productRespone = optionalProductDTO.get();
-//            return new ResponseEntity<>(productRespone, HttpStatus.OK);
-//        } else {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDetailById> getProductbyid(@PathVariable("id") long id) {
+        ProductDetailById productDetailById = productService.getProductbyid(id);
+
+        if (ObjectUtils.isNotEmpty(productDetailById)) {
+            return new ResponseEntity<>(productDetailById, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     @GetMapping("/category/{id}")
     public ResponseEntity<ArrayList<Product>> getproductsbycategory(@PathVariable("id") long id){

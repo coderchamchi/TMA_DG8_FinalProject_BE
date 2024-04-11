@@ -3,10 +3,13 @@ package com.bezkoder.springjwt.Service.Impl;
 import com.bezkoder.springjwt.Service.ProductService;
 
 import com.bezkoder.springjwt.Service.SizeService;
+import com.bezkoder.springjwt.dto.ProductDetailById;
+import com.bezkoder.springjwt.dto.ProductListDTO;
 import com.bezkoder.springjwt.dto.ProductSaveRequest;
 import com.bezkoder.springjwt.entities.*;
 import com.bezkoder.springjwt.repository.CategoryRepository;
 import com.bezkoder.springjwt.repository.ProductRepository;
+import com.bezkoder.springjwt.repository.SizeRepository;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,7 +21,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.Function;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -32,32 +34,45 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private SizeService sizeService;
 
+    @Autowired
+    private SizeRepository sizeRepository;
 
     @Override
-    public List<Product> GetAllProduct() {
-return null;
+    public List<ProductListDTO> GetAllProduct() {
+        List<Product> products = productRepository.findAll();
+        List<ProductListDTO> listProducts = new ArrayList<>(); // Tạo danh sách rỗng
 
+        products.forEach(item -> {
+            Optional<Size> size = sizeRepository.findByIdProduct(item.getIdProduct()).stream().findFirst();
+            if (ObjectUtils.isNotEmpty(size)) {
+                ProductListDTO productListDTO = new ProductListDTO(); // Tạo đối tượng mới bên trong lambda
+                productListDTO.setPrice(size.get().getPrice());
+                productListDTO.setProductName(item.getProductName());
+                productListDTO.setBase64(item.getBase64());
+                productListDTO.setIdProduct(item.getIdProduct());
+                listProducts.add(productListDTO); // Thêm đối tượng vào danh sách
+            }
+        });
+
+        return listProducts;
     }
 
-//    @Override
-//    public Optional<ProductDetailById> getProductbyid(long id) {
-//        ProductDetailById productDTO = new ProductDetailById();
-//        return productRepository.findById(id)
-//                .map(item -> {
-//                    productDTO.setProductName(item.getProductName());
-//                    productDTO.setPrice(item.getPrice());
-//                    productDTO.setDescription(item.getDescription());
-//                    productDTO.setCreated_at(item.getCreated_at());
-//                    productDTO.setUpdated_at(item.getUpdated_at());
-//                    productDTO.setWarehouse(item.getWarehouse());
-//                    productDTO.setDiscount(item.getDiscount());
-//                    productDTO.setSize(item.getListSize());
-//                    productDTO.setBase64(item.getBase64());
-//                    productDTO.setCategory(item.getCategory().getCategoryname());
-//                    return productDTO;
-//                });
-//
-//    }
+
+    @Override
+    public ProductDetailById getProductbyid(long id) {
+        Optional<Product> product = productRepository.findById(id);
+        ProductDetailById productDetailById = new ProductDetailById();
+        if(product.isPresent()){
+            Product productData = product.get();
+            List<Size> sizes = sizeRepository.findByIdProduct(productData.getIdProduct());
+            productDetailById.setProductName(productData.getProductName());
+            productDetailById.setBase64(productData.getBase64());
+            productDetailById.setProductDescription(productData.getProductDescription());
+            productDetailById.setSizes(sizes);
+        }
+        return productDetailById;
+    }
+
 
     @Override
     public ArrayList<Product> getProductbyName(String query) {
