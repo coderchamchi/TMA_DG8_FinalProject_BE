@@ -1,25 +1,24 @@
-//package com.bezkoder.springjwt.Service.Impl;
-//
-//import com.bezkoder.springjwt.Service.ShoppingCartSItemService;
-//import com.bezkoder.springjwt.dto.ShoppingCartItemDTO;
-//import com.bezkoder.springjwt.entities.*;
-//import com.bezkoder.springjwt.repository.ShoppingCartRepository;
-//import com.bezkoder.springjwt.repository.SizeRepository;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.util.ObjectUtils;
-//
-//import java.util.Optional;
-//
-//public class ShoppingCartItemServiceImpl implements ShoppingCartSItemService {
-//
-//    @Autowired
-//    ShoppingCartRepository shoppingCartRepository;
-//
-//    @Autowired
-//    SizeRepository sizeRepository;
-//
-//    @Override
-//    public boolean addItemToCart(User user, ShoppingCartItemDTO shoppingCartItemDTO) {
+package com.bezkoder.springjwt.Service.Impl;
+
+import com.bezkoder.springjwt.Service.ShoppingCartSItemService;
+import com.bezkoder.springjwt.dto.ShoppingCartItemDTO;
+import com.bezkoder.springjwt.entities.*;
+import com.bezkoder.springjwt.repository.ShoppingCartRepository;
+import com.bezkoder.springjwt.repository.SizeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ShoppingCartItemServiceImpl implements ShoppingCartSItemService {
+
+    @Autowired
+    ShoppingCartRepository shoppingCartRepository;
+
+    @Autowired
+    SizeRepository sizeRepository;
+
+    @Override
+    public boolean addItemToCart(User user, ShoppingCartItemDTO shoppingCartItemDTO) {
 //        Optional<Size> size = sizeRepository.findById(shoppingCartItemDTO.getSize());
 //        if(size.isPresent()){
 //            if(ObjectUtils.isEmpty(user.getShoppingCart())){
@@ -35,16 +34,16 @@
 //            shoppingCartItem.setSize(size.get());
 //            return true;
 //        }
-//        return false;
-//    }
-//
-//    @Override
-//    public ShoppingCartItem updateItemInCart(Size size, int quantity, User user) {
-//        return null;
-//    }
-//
-//    @Override
-//    public boolean deleteItemFromCart(Product product, User user) {
-//        return false;
-//    }
-//}
+        return false;
+    }
+
+    @Override
+    public ShoppingCartItem updateItemInCart(Size size, int quantity, User user) {
+        return null;
+    }
+
+    @Override
+    public boolean deleteItemFromCart(Product product, User user) {
+        return false;
+    }
+}

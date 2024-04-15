@@ -1,5 +1,6 @@
 package com.bezkoder.springjwt.repository;
 
+import com.bezkoder.springjwt.dto.SizeInCartDTO;
 import com.bezkoder.springjwt.entities.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,8 +19,4 @@ public interface SizeRepository extends JpaRepository<Size, Long> {
             nativeQuery = true)
     List<Size> findByIdProduct(long id);
 
-//    @Query(
-//            value = "",
-//            nativeQuery = true)
-//    Size findBySizeName(ESize size);
 }

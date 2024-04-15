@@ -13,7 +13,6 @@ import com.bezkoder.springjwt.Service.UserService;
 
 import com.bezkoder.springjwt.dto.ResponseJson;
 import com.bezkoder.springjwt.dto.UserDTO;
-import com.bezkoder.springjwt.entities.ShoppingCart;
 import com.bezkoder.springjwt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,6 +27,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import com.bezkoder.springjwt.entities.ERole;
@@ -167,11 +168,27 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
   }
 
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public <String, string> Map<String, String> handleValidationExceptions(MethodArgumentNotValidException e){
+
+    Map<String, String> errors = new HashMap<>();
+
+    e.getBindingResult().getAllErrors().forEach((error )->{
+      String fieldName = (String) ((FieldError)error ).getField();
+      String errorMessage = (String) error.getDefaultMessage();
+      errors.put(fieldName, errorMessage);
+    });
+
+    return errors;
+  }
+
+
   @PutMapping("/update/{id}")
   public ResponseEntity<ResponseJson<Boolean>> updateUser
           (@PathVariable("id") Long id, @RequestBody UserDTO userDTO) {
 
-      User user = userRepository.getById(id);
+      User user = userRepository.getReferenceById(id);
       user.setUpdatedDate(LocalDate.now());
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
       user.setBirthday(LocalDate.parse(userDTO.getBirthday(),formatter));

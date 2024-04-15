@@ -12,7 +12,7 @@ import java.util.Set;
 @Service
 public interface ShoppingCartSItemService {
 
-//    boolean addItemToCart(User user, ShoppingCartItemDTO shoppingCartItemDTO);
+    boolean addItemToCart(User user, ShoppingCartItemDTO shoppingCartItemDTO);
 
     ShoppingCartItem updateItemInCart(Size size, int quantity, User user);
 

@@ -51,4 +51,9 @@ public class SizeserviceImpl implements SizeService {
         return sizeRepository.findByIdProduct(product);
     }
 
+    @Override
+    public Optional<Size> findByIdSize(long size) {
+        return sizeRepository.findById(size);
+    }
+
 }
