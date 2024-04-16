@@ -33,20 +33,20 @@ public class Payment {
     @JsonIgnore
     private Voucher voucher;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "idUser")
-    @JsonIgnore
-    private User user;
+//    @ManyToOne(fetch=FetchType.LAZY)
+//    @JoinColumn(name = "idUser")
+//    @JsonIgnore
+//    private User user;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "idPaymentMethod")
     @JsonIgnore
     private PaymentMethod paymentMethod;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "idSize")
-    @JsonIgnore
-    private Size size ;
+//    @ManyToOne(fetch=FetchType.LAZY)
+//    @JoinColumn(name = "idSize")
+//    @JsonIgnore
+//    private Size size ;
 
     @Column(name = "email")
     private String email;

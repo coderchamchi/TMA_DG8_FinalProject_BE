@@ -42,9 +42,9 @@ public class Size {
     @JsonIgnore
     private List<ShoppingCartItem> listShoppingCartItem;
 
-    @OneToMany(mappedBy = "size")
-    @JsonIgnore
-    private List<Payment> listPayment;
+//    @OneToMany(mappedBy = "size")
+//    @JsonIgnore
+//    private List<Payment> listPayment;
 
     public int getPrice() {
         return price;

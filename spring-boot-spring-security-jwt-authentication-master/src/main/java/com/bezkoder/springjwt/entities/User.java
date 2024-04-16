@@ -69,9 +69,9 @@ public class User {
   private List<ShoppingCart> shoppingCart = new ArrayList<>();
   // =new Arraylist<>() là để tránh tình trạng null exception khi thao tác với class shoppingcartitem mà chưa khởi tạo
 
-  @OneToMany(mappedBy = "user")
-  @JsonIgnore
-  private List<Payment> listPayment;
+//  @OneToMany(mappedBy = "user")
+//  @JsonIgnore
+//  private List<Payment> listPayment;
 
   //payment
 
