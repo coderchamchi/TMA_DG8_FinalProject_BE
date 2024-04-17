@@ -10,13 +10,12 @@ import com.bezkoder.springjwt.Service.UserService;
 import com.bezkoder.springjwt.dto.*;
 
 
-import com.bezkoder.springjwt.entities.Product;
-import com.bezkoder.springjwt.entities.Size;
-import com.bezkoder.springjwt.entities.User;
+import com.bezkoder.springjwt.entities.*;
 import com.bezkoder.springjwt.repository.ShoppingCartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -28,6 +27,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.Map;
 
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -126,5 +126,15 @@ public class CartController {
 //            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User Not Found"));
 //        }
 //    }
+    @PatchMapping("/update/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseJson<ShoppingCart> updateShoppingCart(@PathVariable long id, @RequestBody Map<String,Object> fields){
+        ShoppingCart cart  = shoppingCartService.updateShoppingCart(id, fields);
+        if(cart != null){
+            return new ResponseJson<>(cart, HttpStatus.ACCEPTED, "Updated");
+        }
+        else
+            return new ResponseJson<>(HttpStatus.NOT_FOUND, "Not Found a shoppingCart for this user!");
+    }
 
 }

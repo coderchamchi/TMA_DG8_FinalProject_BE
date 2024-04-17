@@ -8,20 +8,20 @@ import com.bezkoder.springjwt.dto.ItemUpdate;
 import com.bezkoder.springjwt.dto.ProductListDTO;
 import com.bezkoder.springjwt.dto.ShoppingCartItemDTO;
 import com.bezkoder.springjwt.dto.SizeInCartDTO;
-import com.bezkoder.springjwt.entities.ShoppingCart;
-import com.bezkoder.springjwt.entities.ShoppingCartItem;
-import com.bezkoder.springjwt.entities.Size;
-import com.bezkoder.springjwt.entities.User;
+import com.bezkoder.springjwt.entities.*;
 import com.bezkoder.springjwt.repository.ShoppingCartItemRepository;
 import com.bezkoder.springjwt.repository.ShoppingCartRepository;
 import com.bezkoder.springjwt.repository.SizeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -114,6 +114,23 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         shoppingCartItem.setQuantity(shoppingCartItemDTO.getQuantity());
         shoppingCartItemRepository.save(shoppingCartItem);
         return true;
+    }
+
+    @Override
+    public ShoppingCart updateShoppingCart(long id, Map<String, Object> fields) {
+        Optional<ShoppingCart> existingCart = shoppingCartRepository.findById(id);
+
+        if(existingCart.isPresent()){
+            fields.forEach((key, value)->
+            {
+                Field field = ReflectionUtils.findField(Product.class, key);
+                assert field != null;
+                field.setAccessible(true);
+                ReflectionUtils.setField(field, existingCart.get(), value);
+            });
+            return shoppingCartRepository.save(existingCart.get());
+        }
+        return null;
     }
 
 

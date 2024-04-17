@@ -4,11 +4,13 @@ import com.bezkoder.springjwt.dto.ItemUpdate;
 import com.bezkoder.springjwt.dto.ProductListDTO;
 import com.bezkoder.springjwt.dto.ShoppingCartItemDTO;
 import com.bezkoder.springjwt.dto.SizeInCartDTO;
+import com.bezkoder.springjwt.entities.ShoppingCart;
 import com.bezkoder.springjwt.entities.Size;
 import com.bezkoder.springjwt.entities.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -25,6 +27,9 @@ public interface ShoppingCartService {
 
     // add item to cart
     boolean addItemToCart(ShoppingCartItemDTO shoppingCartItemDTO);
+
+    // update by patch
+    ShoppingCart updateShoppingCart(long id, Map<String, Object> fields);
 
 
 }

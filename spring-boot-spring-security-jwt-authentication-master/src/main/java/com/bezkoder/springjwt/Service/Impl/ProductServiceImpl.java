@@ -39,12 +39,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductListDTO> GetAllProduct() {
-        List<Product> products = productRepository.findAll();
         List<ProductListDTO> listProducts = new ArrayList<>(); // Tạo danh sách rỗng
 
-        products.forEach(item -> {
+        productRepository.GetAllProduct().forEach(item -> {
             Optional<Size> size = sizeRepository.findByIdProduct(item.getIdProduct()).stream().findFirst();
-            if (ObjectUtils.isNotEmpty(size)) {
+            if (size.isPresent()) {
                 ProductListDTO productListDTO = new ProductListDTO(); // Tạo đối tượng mới bên trong lambda
                 productListDTO.setPrice(size.get().getPrice());
                 productListDTO.setProductName(item.getProductName());
@@ -117,72 +116,7 @@ public class ProductServiceImpl implements ProductService {
         }
         return false;
     }
-//    @Override
-//    public boolean updateProductbyid(Long id, ProductRequest productDTO) {
-//        if (ObjectUtils.isNotEmpty(productDTO)){
-//            Optional<Category> categoryid = categoryRepository.findById(productDTO.getCategory());
-//            if (categoryid.isPresent()) {
-//                try {
-//                Product product = productRepository.getById(id);
-//                    product.setProductname(productDTO.getProductname());
-//                    product.setPrice(productDTO.getPrice());
-//                    product.setDescription(productDTO.getDescription());
-//                    product.setCreated_at(LocalDate.now());
-//                    product.setUpdated_at(LocalDate.now());
-//                    product.setWarehouse(productDTO.getWarehouse());
-//                    product.setDiscount(productDTO.getDiscount());
-//                    Set<String> sizeinput = productDTO.getSize();
-//                    Set<Size> listsize = new HashSet<>();
-//
-//                    if (sizeinput == null) {
-//                        Size sizename = sizeService.findBySizeName(ESize.L)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        listsize.add(sizename);
-//                    }
-//                    else
-//                    {
-//                        sizeinput.forEach(size -> {
-//                            switch(size) {
-//                                case "S":{
-//                                    Size sizeS = sizeService.findBySizeName(ESize.S)
-//                                            .orElseThrow(() -> new RuntimeException("Error: Size is not found."));
-//                                    listsize.add(sizeS);
-//                                }
-//                                case "M": {
-//                                    Size sizeM = sizeService.findBySizeName(ESize.M)
-//                                            .orElseThrow(() -> new RuntimeException("Error: Size is not found."));
-//                                    listsize.add(sizeM);
-//                                }
-//                                default:{
-//                                    Size sizeL = sizeService.findBySizeName(ESize.L)
-//                                            .orElseThrow(() -> new RuntimeException("Error: Size is not found."));
-//                                    listsize.add(sizeL);
-//                                }
-//                            }
-//                        });
-//                    }
-//                    product.setListSize(listsize);
-//                    product.setCategory(categoryid.get());
-//                    class4getpicture getpicture = new class4getpicture();
-//                    try {
-//                        String base64 = getpicture.getbase64fromfolder(productDTO.getProductname());
-//                        product.setBase64(base64);
-//                    } catch (IOException e) {
-//                        product.setBase64(null);
-//                    }
-//                    productRepository.save(product);
-//                    return true;
-//                    }
-//                    catch (Exception e){
-//                        return false;
-//                    }
-//
-//                }
-//            return false;
-//        }
-//        return false;
-//
-//    }
+
 
     @Override
     public ArrayList<Product> getproductbycategory(Long id) {

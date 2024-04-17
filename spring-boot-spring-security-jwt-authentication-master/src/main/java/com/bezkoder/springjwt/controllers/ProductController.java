@@ -6,10 +6,6 @@ import com.bezkoder.springjwt.entities.Product;
 import com.bezkoder.springjwt.Service.ProductService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,13 +25,13 @@ public class ProductController {
     CategoryService categoryService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<ProductListDTO>> findallProduct() {
+    public ResponseEntity<List<ProductListDTO>> getAllProduct() {
         List<ProductListDTO> listProduct = productService.GetAllProduct();
         return new ResponseEntity<List<ProductListDTO>>(listProduct, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDetailById> getProductbyid(@PathVariable("id") long id) {
+    public ResponseEntity<ProductDetailById> getProductById(@PathVariable("id") long id) {
         ProductDetailById productDetailById = productService.getProductbyid(id);
 
         if (ObjectUtils.isNotEmpty(productDetailById)) {
@@ -46,11 +42,11 @@ public class ProductController {
     }
 
     @GetMapping("/category/{id}")
-    public ResponseEntity<ArrayList<Product>> getproductsbycategory(@PathVariable("id") long id){
+    public ResponseEntity<ArrayList<Product>> getProductsByCategory(@PathVariable("id") long id){
         Optional<CategoryDTO> optional = categoryService.getCategorybyid(id);
         if (ObjectUtils.isNotEmpty(optional)){
-            ArrayList<Product> listproduct = productService.getproductbycategory(id);
-            return new ResponseEntity<ArrayList<Product>>(listproduct, HttpStatus.OK);
+            ArrayList<Product> listProduct = productService.getproductbycategory(id);
+            return new ResponseEntity<ArrayList<Product>>(listProduct, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
