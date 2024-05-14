@@ -1,6 +1,5 @@
 package com.bezkoder.springjwt.repository;
 
-import com.bezkoder.springjwt.dto.ProductListDTO;
 import com.bezkoder.springjwt.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,18 +19,22 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.productName LIKE CONCAT('%',:query, '%')")
     ArrayList<Product> findProductbyname(String query);
 
-
-//    @Query("SELECT p FROM Product p WHERE p.brand LIKE CONCAT('%',:query, '%')")
-//    ArrayList<Product> findProductbyBrand(String query);
-
-//    @Query("SELECT p FROM Product p JOIN Category c ON p.category.id = c.id WHERE c.name LIKE CONCAT('%', :query, '%')")
-//    ArrayList<Product> Productbycategoryname(String query);
-
     @Query(
             value = "select * from product where status = 1",
             nativeQuery = true
     )
     List<Product> GetAllProduct();
 
+    @Query(
+            value = "select * from product where product_name like CONCAT ('%',:name,'%')",
+            nativeQuery = true
+    )
+    List<Product> GetProductRelation(String name);
+
+    @Query(
+            value = "select * from product where id_category = :categoryId",
+            nativeQuery = true
+    )
+    List<Product> GetProductByCategory(long categoryId);
 }
 

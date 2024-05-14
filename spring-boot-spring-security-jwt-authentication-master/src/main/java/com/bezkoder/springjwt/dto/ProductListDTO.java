@@ -16,8 +16,12 @@ public class ProductListDTO {
 
     private String productName;
 
+    private String productDescription;
+
     private String base64;
 
     private int price;
+
+    private long idCategory;
 
 }

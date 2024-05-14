@@ -1,18 +1,33 @@
 package com.bezkoder.springjwt.controllers;
 
 import com.bezkoder.springjwt.Service.CategoryService;
+import com.bezkoder.springjwt.Service.UserService;
 import com.bezkoder.springjwt.dto.*;
+import com.bezkoder.springjwt.entities.ERole;
 import com.bezkoder.springjwt.entities.Product;
 import com.bezkoder.springjwt.Service.ProductService;
+import com.bezkoder.springjwt.entities.Role;
+import com.bezkoder.springjwt.entities.User;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.bezkoder.springjwt.entities.ERole.ROLE_ADMIN;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -23,6 +38,9 @@ public class ProductController {
 
     @Autowired
     CategoryService categoryService;
+
+    @Autowired
+    UserService userService;
 
     @GetMapping("/all")
     public ResponseEntity<List<ProductListDTO>> getAllProduct() {
@@ -41,26 +59,42 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/proOutstanding")
+    public ResponseEntity<List<ProductListDTO>> getProOutstanding(){
+        List<ProductListDTO> listProduct = productService.getProductSortByPrice()
+                .stream()
+                .limit(5)
+                .collect(Collectors.toList());
+        return new ResponseEntity<List<ProductListDTO>>(listProduct, HttpStatus.OK);
+    }
+
+    @GetMapping("/relation/{id}")
+    public ResponseEntity<List<ProductListDTO>> getProductRelation(@PathVariable("id") long id) {
+        List<ProductListDTO> listProduct =  productService.getProductsRelation(id);
+        return new ResponseEntity<List<ProductListDTO>>(listProduct, HttpStatus.OK);
+    }
+
+
     @GetMapping("/category/{id}")
-    public ResponseEntity<ArrayList<Product>> getProductsByCategory(@PathVariable("id") long id){
+    public ResponseEntity<ArrayList<ProductListDTO>> getProductsByCategory(@PathVariable("id") long id){
         Optional<CategoryDTO> optional = categoryService.getCategorybyid(id);
         if (ObjectUtils.isNotEmpty(optional)){
-            ArrayList<Product> listProduct = productService.getproductbycategory(id);
-            return new ResponseEntity<ArrayList<Product>>(listProduct, HttpStatus.OK);
+            ArrayList<ProductListDTO> listProduct = productService.getproductbycategory(id);
+            return new ResponseEntity<ArrayList<ProductListDTO>>(listProduct, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-//    @GetMapping("/categoryname")
-//    public ResponseEntity<ArrayList<Product>> getproductsbycategoryname(@RequestParam("query") String query){
-//        try {
-//            ArrayList<Product> products = productService.getproductbycategoryname(query);
-//            return new ResponseEntity<>(products, HttpStatus.OK);
-//        }
-//        catch (Exception e){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
+    @GetMapping("/categoryname")
+    public ResponseEntity<List<Product>> getproductsbycategoryname(@RequestParam("query") String query){
+        try {
+            List<Product> products = productService.getproductbycategoryname(query);
+            return new ResponseEntity<>(products, HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
 
     @GetMapping("/searchbyname")
@@ -74,6 +108,7 @@ public class ProductController {
         }
     }
 
+
 //    @GetMapping("/searchbybrand")
 //    public ResponseEntity<ArrayList<Product>> getproductbybrand(@RequestParam("query") String query){
 //        try {
@@ -85,15 +120,28 @@ public class ProductController {
 //        }
 //    }
 
+
+
     @PostMapping("/add")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseJson<Boolean>> addProduct(@Validated @RequestBody ProductSaveRequest productRequest)
                                                             //sử dụng @RBody để nó tự động convert JSON thành đối tượng DTO
                                                             //sử dụng @Validated để check xem những trường bên entity cấu hình
                                                             //so với data lúc nhân được có phù hợp hay không
     {
-        Boolean chek = productService.saveProduct(productRequest);
-        if(!chek){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean checkAuth = false;
+        for(GrantedAuthority role : auth.getAuthorities()){
+            if(role.toString().equals(String.valueOf(ROLE_ADMIN))){
+                checkAuth = true;
+            }
+        }
+        if (!checkAuth) {
+            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.FORBIDDEN, "Error: User has not Permission"));
+        }
+        boolean check = productService.saveProduct(productRequest);
+        if(!check){
             return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error: Can not add the product"));
         }
         return ResponseEntity.ok().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.OK, "Add Successed"));
@@ -176,20 +224,20 @@ public class ProductController {
 //        return new ResponseEntity<List<Product>>(products,HttpStatus.OK);
 //    }
 
-//    @GetMapping("/getpagging")
+    @GetMapping("/pagination")
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN', 'ROLE_USER')")
-//    public ResponseEntity<Map<String, Object>> getPagging(@RequestParam(defaultValue = "0") int page, //page là số trang muốn phân
-//                                                          @RequestParam(defaultValue = "8") int size) // size là só sp muốn hiển thị ở 1 trang
-//    {
-//        Pageable pageable = PageRequest.of(page, size);
-//        Page<Product> pageproducts = productService.getPagging(pageable);
-//        Map <String,Object> data = new HashMap<>();
-//        data.put("product",pageproducts.getContent());
-//        data.put("total",pageproducts.getSize());
-//        data.put("totalItems",pageproducts.getTotalElements());
-//        data.put("totalPages",pageproducts.getTotalPages());
-//        return new ResponseEntity<>(data,HttpStatus.OK);
-//    }
+    public ResponseEntity<Map<String, Object>> getPagging(@RequestParam(defaultValue = "0") int page, //page là số trang muốn phân
+                                                          @RequestParam(defaultValue = "9") int size) // size là só sp muốn hiển thị ở 1 trang
+    {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Product> pageproducts = productService.getPagging(pageable);
+        Map <String,Object> data = new HashMap<>();
+        data.put("product",pageproducts.getContent());
+        data.put("total",pageproducts.getSize());
+        data.put("totalItems",pageproducts.getTotalElements());
+        data.put("totalPages",pageproducts.getTotalPages());
+        return new ResponseEntity<>(data,HttpStatus.OK);
+    }
 
 //    @GetMapping("/getpaggingandsortbyname")
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN', 'ROLE_USER')")

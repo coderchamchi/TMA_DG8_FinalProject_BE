@@ -7,6 +7,7 @@ import com.bezkoder.springjwt.dto.ProductSaveRequest;
 import com.bezkoder.springjwt.entities.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 
 import java.util.ArrayList;
@@ -19,7 +20,6 @@ public interface ProductService {
     List<ProductListDTO> GetAllProduct();
 
     //Get Product by id
-
     ProductDetailById getProductbyid(long id);
 
     //get Product by name
@@ -35,9 +35,11 @@ public interface ProductService {
     boolean saveProduct(ProductSaveRequest productDTO);
 
     //get product by category id
-    ArrayList<Product> getproductbycategory(Long id);
+    ArrayList<ProductListDTO> getproductbycategory(Long id);
 
 //    ArrayList<Product> getproductbycategoryname(String query);
+
+    List<Product> getproductbycategoryname(String query);
 
     //update by patch
     Product updatebypatch(long id, Map<String, Object> fields);
@@ -52,4 +54,7 @@ public interface ProductService {
 
     Page<Product> getPagging(Pageable pageable);
 
+    List<ProductListDTO> getProductsRelation(long id);
+
+    List<ProductListDTO> getProductSortByPrice();
 }

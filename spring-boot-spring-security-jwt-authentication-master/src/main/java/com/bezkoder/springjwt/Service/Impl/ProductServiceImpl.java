@@ -47,12 +47,65 @@ public class ProductServiceImpl implements ProductService {
                 ProductListDTO productListDTO = new ProductListDTO(); // Tạo đối tượng mới bên trong lambda
                 productListDTO.setPrice(size.get().getPrice());
                 productListDTO.setProductName(item.getProductName());
+                productListDTO.setProductDescription(item.getProductDescription());
+                productListDTO.setBase64(item.getBase64());
+                productListDTO.setIdProduct(item.getIdProduct());
+                productListDTO.setIdCategory(item.getCategory().getCategoryId());
+                listProducts.add(productListDTO); // Thêm đối tượng vào danh sách
+            }
+        });
+
+        return listProducts;
+    }
+
+    @Override
+    public List<ProductListDTO> getProductsRelation(long id) {
+        Optional<Product> product = productRepository.findById(id);
+        if(product.isPresent()){
+            Optional<Category> category = categoryRepository.findById(product.get().getCategory().getCategoryId());
+            if(category.isPresent()){
+                List<Product> products = productRepository.GetProductByCategory(category.get().getCategoryId());
+                List<ProductListDTO> listProducts = new ArrayList<>(); // Tạo danh sách rỗng
+                products.forEach(item ->
+                {
+                    Optional<Size> size = sizeRepository.findByIdProduct(item.getIdProduct()).stream().findFirst();
+                    if (size.isPresent()) {
+                        ProductListDTO productListDTO = new ProductListDTO(); // Tạo đối tượng mới bên trong lambda
+                        productListDTO.setPrice(size.get().getPrice());
+                        productListDTO.setProductName(item.getProductName());
+                        productListDTO.setProductDescription(item.getProductDescription());
+                        productListDTO.setBase64(item.getBase64());
+                        productListDTO.setIdProduct(item.getIdProduct());
+                        productListDTO.setIdCategory(item.getCategory().getCategoryId());
+                        listProducts.add(productListDTO); // Thêm đối tượng vào danh sách
+                    }
+                });
+                return listProducts;
+            }
+            return null;
+        }
+        return null;
+    }
+
+    @Override
+    public List<ProductListDTO> getProductSortByPrice() {
+        List<ProductListDTO> listProducts = new ArrayList<>(); // Tạo danh sách rỗng
+
+        productRepository.GetAllProduct().forEach(item -> {
+            Optional<Size> size = sizeRepository.findByIdProduct(item.getIdProduct()).stream().findFirst();
+            if (size.isPresent()) {
+                ProductListDTO productListDTO = new ProductListDTO(); // Tạo đối tượng mới bên trong lambda
+                productListDTO.setPrice(size.get().getPrice());
+                productListDTO.setProductName(item.getProductName());
+                productListDTO.setProductDescription(item.getProductDescription());
                 productListDTO.setBase64(item.getBase64());
                 productListDTO.setIdProduct(item.getIdProduct());
                 listProducts.add(productListDTO); // Thêm đối tượng vào danh sách
             }
         });
-
+        Collections.sort(listProducts, (p1, p2) -> Double.compare(p2.getPrice(), p1.getPrice()));
+        // function Collections.sort has 2 param, listProducts is list is needed sort and
+        // parameter second (p1, p2) is interface to sort
         return listProducts;
     }
 
@@ -64,6 +117,7 @@ public class ProductServiceImpl implements ProductService {
         if(product.isPresent()){
             Product productData = product.get();
             List<Size> sizes = sizeRepository.findByIdProduct(productData.getIdProduct());
+            productDetailById.setIdProduct(productData.getIdProduct());
             productDetailById.setProductName(productData.getProductName());
             productDetailById.setBase64(productData.getBase64());
             productDetailById.setProductDescription(productData.getProductDescription());
@@ -76,10 +130,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ArrayList<Product> getProductbyName(String query) {
         return productRepository.findProductbyname(query);}
-
-//    @Override
-//    public ArrayList<Product> getProdcuctbyBrand(String query) {
-//        return productRepository.findProductbyBrand(query);}
 
     @Override
     public boolean saveProduct(ProductSaveRequest productDTO) {
@@ -119,16 +169,31 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ArrayList<Product> getproductbycategory(Long id) {
+    public ArrayList<ProductListDTO> getproductbycategory(Long id) {
         ArrayList<Product> products = productRepository.findProductByStatusNative(id);
-        return products;
+        ArrayList<ProductListDTO> listProducts = new ArrayList<>();
+        products.forEach(item ->
+        {
+            Optional<Size> size = sizeRepository.findByIdProduct(item.getIdProduct()).stream().findFirst();
+            if (size.isPresent()) {
+                ProductListDTO productListDTO = new ProductListDTO(); // Tạo đối tượng mới bên trong lambda
+                productListDTO.setPrice(size.get().getPrice());
+                productListDTO.setProductName(item.getProductName());
+                productListDTO.setProductDescription(item.getProductDescription());
+                productListDTO.setBase64(item.getBase64());
+                productListDTO.setIdProduct(item.getIdProduct());
+                productListDTO.setIdCategory(item.getCategory().getCategoryId());
+                listProducts.add(productListDTO); // Thêm đối tượng vào danh sách
+            }
+        });
+        return listProducts;
     }
 
-//    @Override
-//    public ArrayList<Product> getproductbycategoryname(String query) {
-//        ArrayList<Product> products = productRepository.Productbycategoryname(query);
-//        return products;
-//    }
+    @Override
+    public List<Product> getproductbycategoryname(String query) {
+        Category category = categoryRepository.getCategoryByName(query);
+        return productRepository.GetProductByCategory(category.getCategoryId());
+    }
 
     @Override
     public Product updatebypatch(long id, Map<String, Object> fields) {
@@ -213,6 +278,7 @@ public class ProductServiceImpl implements ProductService {
     public Page<Product> getPagging(Pageable pageable) {
         return productRepository.findAll(pageable);
     }
+
 
     @Override
     public boolean deleteProductbyid(long id) {

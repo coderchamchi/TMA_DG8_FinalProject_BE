@@ -47,5 +47,15 @@ public class UserServiceImpl implements UserService {
     public List<User> getalluser(){
         return userRepository.findAll();
     }
+
+    @Override
+    public List<String> getAllUsername() {
+        return userRepository.GetAllUsername();
+    }
+
+    @Override
+    public List<String> getAllEmail() {
+        return userRepository.GetAllEmail();
+    }
 }
 

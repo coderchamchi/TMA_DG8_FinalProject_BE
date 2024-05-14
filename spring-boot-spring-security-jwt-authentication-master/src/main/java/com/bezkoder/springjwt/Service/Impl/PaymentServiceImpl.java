@@ -60,6 +60,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setTransportFee(paymentDTO.getTransportFee());
         payment.setShoppingCart(cart);
         paymentRepository.save(payment);
+        cart.setStatus(0);
         return true;
     }
 

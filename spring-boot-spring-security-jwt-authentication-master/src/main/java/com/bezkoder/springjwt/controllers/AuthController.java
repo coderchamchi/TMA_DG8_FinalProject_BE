@@ -76,11 +76,11 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
     // Lấy thông tin người dùng từ cơ sở dữ liệu
     UserDetails user = userDetailsService.loadUserByUsername(loginRequest.getEmail());
     if(ObjectUtils.isEmpty(user)){
-      return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found"));
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found"));
     }
     // Kiểm tra mật khẩu đã nhập với mật khẩu đã mã hóa trong cơ sở dữ liệu
     if (!encoder.matches(loginRequest.getPassword(), user.getPassword())) {
-      return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found, Password Wrong!"));
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found, Password Wrong!"));
     }
     // ok hết rồi thì mình lấy thông tin để tạo ra JWT, tiện cho việc đăng nhập
     Authentication authentication = authenticationManager.authenticate(
@@ -162,6 +162,7 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
     }
 
     user.setListRole(roles);
+    user.setStatus(1);
     userService.saveOrupdate(user);
     shoppingCartService.saveShoppingCart(user);
 
@@ -213,5 +214,13 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
     User user = userService.findUserByUserName();
     return new ResponseEntity<User>(user, HttpStatus.OK);
   }
+  @GetMapping("listUsername")
+  public List<String> getListUsername(){
+    return userService.getAllUsername();
+  }
 
+  @GetMapping("listEmail")
+  public List<String> getListEmail(){
+    return userService.getAllEmail();
+  }
 }

@@ -1,5 +1,6 @@
 package com.bezkoder.springjwt.config;
 
+import lombok.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +17,7 @@ import com.bezkoder.springjwt.config.jwt.AuthEntryPointJwt;
 import com.bezkoder.springjwt.config.jwt.AuthTokenFilter;
 import com.bezkoder.springjwt.Service.Impl.UserDetailsServiceImpl;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 
 @Configuration // Class được đánh dấu annotaiton này được Spring Container sử dụng làm nguồn định nghĩa bean.
 @EnableWebSecurity //annotation cơ bản của Spring Security để kích hoạt tính năng bảo mật trên ứng dụng web.

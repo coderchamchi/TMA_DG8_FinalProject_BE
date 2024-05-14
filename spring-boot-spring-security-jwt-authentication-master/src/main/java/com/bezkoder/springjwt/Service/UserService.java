@@ -17,4 +17,7 @@ public interface UserService {
 
     List<User> getalluser();
 
+    List<String> getAllUsername();
+
+    List<String> getAllEmail();
 }
