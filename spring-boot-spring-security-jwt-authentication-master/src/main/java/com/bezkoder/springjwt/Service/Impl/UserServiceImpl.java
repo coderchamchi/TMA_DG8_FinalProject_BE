@@ -1,6 +1,7 @@
 package com.bezkoder.springjwt.Service.Impl;
 
 import com.bezkoder.springjwt.constant.WebUnit;
+import com.bezkoder.springjwt.dto.updatePassword;
 import com.bezkoder.springjwt.entities.User;
 import com.bezkoder.springjwt.Service.UserService;
 import com.bezkoder.springjwt.repository.UserRepository;
@@ -16,11 +17,6 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Override
-    public Optional<User> findbyEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    @Override
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
     }
@@ -29,7 +25,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByPassword(password);
     }
     @Override
-    public boolean existsByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public Boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
 
@@ -37,6 +38,16 @@ public class UserServiceImpl implements UserService {
     public User saveOrupdate(User user) {
         return userRepository.save(user);
     }
+
+//    @Override
+//    public boolean updatePassword(updatePassword user) {
+//        Optional<User> userCheck = userRepository.findByEmail(user.getEmail());
+//        if(userCheck.isPresent()){
+//            userCheck.get().setPassword(user.getPassword());
+//            return true;
+//        }
+//        return false;
+//    }
 
     @Override
     public User findUserByUserName() {

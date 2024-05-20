@@ -2,6 +2,7 @@ package com.bezkoder.springjwt.Service.Impl;
 
 
 import com.bezkoder.springjwt.Service.UserService;
+import com.bezkoder.springjwt.dto.updatePassword;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.bezkoder.springjwt.entities.User;
 import com.bezkoder.springjwt.repository.UserRepository;
+
+import java.util.Optional;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {

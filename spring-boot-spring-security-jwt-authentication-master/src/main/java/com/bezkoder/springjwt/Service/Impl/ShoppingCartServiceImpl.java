@@ -71,9 +71,11 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
                         ProductListDTO productListDTO = new ProductListDTO();
                         productListDTO.setProductName(String.valueOf(tempSize.getProduct().getProductName()));
+                        productListDTO.setProductDescription(tempSize.getProduct().getProductDescription());
                         productListDTO.setPrice(tempSize.getPrice());
                         productListDTO.setBase64(tempSize.getProduct().getBase64());
                         productListDTO.setIdProduct(tempSize.getProduct().getIdProduct());
+                        productListDTO.setIdCategory(tempSize.getProduct().getCategory().getCategoryId());
                         return productListDTO;
                     }
                     return null;

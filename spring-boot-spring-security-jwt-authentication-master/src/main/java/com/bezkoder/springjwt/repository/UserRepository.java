@@ -16,6 +16,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   Boolean existsByEmail(String email);
 
+  @Query(
+          value = "select * from user where email LIKE CONCAT('%',:email, '%')",
+          nativeQuery = true
+  )
   Optional<User> findByEmail(String email);
 
   Boolean existsByPassword(String password);

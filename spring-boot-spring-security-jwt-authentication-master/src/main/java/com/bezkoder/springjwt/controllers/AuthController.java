@@ -13,6 +13,7 @@ import com.bezkoder.springjwt.Service.UserService;
 
 import com.bezkoder.springjwt.dto.ResponseJson;
 import com.bezkoder.springjwt.dto.UserDTO;
+import com.bezkoder.springjwt.dto.updatePassword;
 import com.bezkoder.springjwt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -124,9 +125,11 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
     // Create new user's account
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     LocalDate birthday = LocalDate.parse(signUpRequest.getBirthday(),formatter);
-    User user = new User( signUpRequest.getUsername(),
+    User user = new User(
+            signUpRequest.getUsername(),
             encoder.encode(signUpRequest.getPassword()),
-                          signUpRequest.getEmail(),birthday);
+            signUpRequest.getEmail(),
+            birthday);
     user.setUpdatedDate(LocalDate.now());
     user.setCreatedDate(LocalDate.now());
     Set<String> strRoles = signUpRequest.getRole();
@@ -222,5 +225,79 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
   @GetMapping("listEmail")
   public List<String> getListEmail(){
     return userService.getAllEmail();
+  }
+
+  @PostMapping("forgotPassword")
+  public ResponseEntity<?> updatePassword(@Valid @RequestBody updatePassword updatepassword) {
+    UserDetails user = userDetailsService.loadUserByUsername(updatepassword.getEmail());
+
+    if(ObjectUtils.isEmpty(user)) {
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Email Not Found"));
+    }
+
+    if(encoder.matches(updatepassword.getPassword(), user.getPassword())){
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "The new password must be different from the old password"));
+    }
+
+    Optional<User> userOutput = userRepository.findByEmail(updatepassword.getEmail());
+    if(userOutput.isEmpty()){
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Optional: Email Not Found"));
+    }
+
+    userOutput.get().setPassword(encoder.encode(updatepassword.getPassword()));
+
+    Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(updatepassword.getEmail(), updatepassword.getPassword()));
+    String jwt = jwtUtils.generateJwtToken(authentication);
+
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    List<String> roles = userDetails.getAuthorities().stream()
+            .map(item -> item.getAuthority())
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(new JwtResponse(
+            jwt,
+            userDetails.getId(),
+            userDetails.getUsername(),
+            userDetails.getEmail(),
+            roles));
+  }
+
+  @PostMapping("validateOTP")
+  public ResponseEntity<?> validateOTP(@Valid @RequestBody updatePassword updatepassword) {
+    UserDetails user = userDetailsService.loadUserByUsername(updatepassword.getEmail());
+
+    if(ObjectUtils.isEmpty(user)) {
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Email Not Found"));
+    }
+
+    if(encoder.matches(updatepassword.getPassword(), user.getPassword())){
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "The new password must be different from the old password"));
+    }
+
+    Optional<User> userOutput = userRepository.findByEmail(updatepassword.getEmail());
+    if(userOutput.isEmpty()){
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Optional: Email Not Found"));
+    }
+
+    userOutput.get().setPassword(encoder.encode(updatepassword.getPassword()));
+
+    Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(updatepassword.getEmail(), updatepassword.getPassword()));
+    String jwt = jwtUtils.generateJwtToken(authentication);
+
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    List<String> roles = userDetails.getAuthorities().stream()
+            .map(item -> item.getAuthority())
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(new JwtResponse(
+            jwt,
+            userDetails.getId(),
+            userDetails.getUsername(),
+            userDetails.getEmail(),
+            roles));
   }
 }

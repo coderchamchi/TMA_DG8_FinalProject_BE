@@ -56,6 +56,9 @@ public class User {
   @Column(name="status")
   private int status;
 
+//  @Column(name="OTP")
+//  private String OTP;
+
   @ManyToMany(fetch = FetchType.LAZY) // lấy user thì lấy luôn quyền của nó
   @JoinTable( name = "userrole",
           joinColumns = @JoinColumn(name = "idUser"),
@@ -88,5 +91,9 @@ public class User {
 
   public void setUserId(Long userId) {
     this.userId = userId;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
   }
 }
