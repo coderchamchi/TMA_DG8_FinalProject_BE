@@ -50,17 +50,17 @@ public class PaymentServiceImpl implements PaymentService {
         if (ObjectUtils.isEmpty(paymentDTO) || ObjectUtils.isEmpty(cart) || paymentMethod.isEmpty() || voucher.isEmpty()) {
             return false;
         }
+
+        cart.setStatus(0);
         Payment payment = new Payment();
         payment.setVoucher(voucher.get());
         payment.setPaymentMethod(paymentMethod.get());
-        payment.setEmail(paymentDTO.getEmail());
         payment.setStatus(0);
         payment.setAddress(paymentDTO.getAddress());
         payment.setCreateDate(LocalDate.now());
         payment.setTransportFee(paymentDTO.getTransportFee());
         payment.setShoppingCart(cart);
         paymentRepository.save(payment);
-        cart.setStatus(0);
         return true;
     }
 
@@ -92,7 +92,6 @@ public class PaymentServiceImpl implements PaymentService {
         List<ProductListDTO> productListDTO = shoppingCartService.getAllItem(userService.findUserByUserName().getUserId());
         paymentResponse.setVoucher(payment.getVoucher().getDescription());
         paymentResponse.setPaymentMethod(payment.getPaymentMethod().getDescription());
-        paymentResponse.setEmail(payment.getEmail());
         paymentResponse.setAddress(payment.getAddress());
         paymentResponse.setTransportFee(payment.getTransportFee());
         paymentResponse.setProductListDTOS(productListDTO);

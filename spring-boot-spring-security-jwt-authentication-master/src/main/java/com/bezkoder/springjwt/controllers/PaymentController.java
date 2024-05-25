@@ -40,9 +40,12 @@ public class PaymentController {
     public  ResponseEntity<ResponseJson<PaymentResponse>> getPayment(){
         User user = userService.findUserByUserName();
         ShoppingCart cart = shoppingCartRepository.getShoppingCartByUser(user.getUserId());
+        if(cart == null){
+            return ResponseEntity.badRequest().body(new ResponseJson<>("Cart isn't found" ));
+        }
         Optional<ShoppingCart> shoppingCart = shoppingCartRepository.findById(cart.getIdShoppingCart());
         if (shoppingCart.isEmpty()){
-            return ResponseEntity.ok().body(new ResponseJson<>("Cart isn't found" ));
+            return ResponseEntity.badRequest().body(new ResponseJson<>("Cart isn't found" ));
         }
         PaymentResponse paymentResponse =  paymentService.findById(shoppingCart.get().getIdShoppingCart());
         if(ObjectUtils.isEmpty(paymentResponse)){

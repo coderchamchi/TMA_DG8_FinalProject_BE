@@ -18,8 +18,6 @@ public class PaymentResponse {
 
     private String paymentMethod;
 
-    private String email;
-
     private String address;
 
     private int transportFee;

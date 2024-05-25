@@ -21,6 +21,5 @@ public class WebUnit {
             return principal.toString();
         }
         return ANONYMOUS_USER;
-
     }
 }

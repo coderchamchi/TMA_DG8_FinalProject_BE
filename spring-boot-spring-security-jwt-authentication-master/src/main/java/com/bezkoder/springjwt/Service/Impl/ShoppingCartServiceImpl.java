@@ -59,6 +59,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public List<ProductListDTO> getAllItem(long user) {
         ShoppingCart cart = shoppingCartRepository.getShoppingCartByUser((user));
+        if (cart == null){
+            return null;
+        }
         List<ProductListDTO> listProduct = shoppingCartItemRepository.gelAllItem(cart.getIdShoppingCart()).stream().map(
                 item -> {
                     Optional<Size> size = sizeRepository.findById(item.getSize().getIdSize());

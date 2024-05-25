@@ -78,6 +78,8 @@ public class WebSecurityConfiguration {
             .antMatchers("/ProjectSJ/Category/**").permitAll()
             .antMatchers("/ProjectSJ/Bill/**").permitAll()
               .antMatchers("/api/sendEmail").permitAll()
+              .antMatchers("/api/validateOTP").permitAll()
+
             .anyRequest().authenticated()
             .and()
             .addFilterAfter(authenticationJwtTokenFilter(), //có nhiệm vụ kiểm tra và xác thực token JWT trong các yêu cầu.

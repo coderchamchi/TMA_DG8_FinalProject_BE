@@ -25,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.util.ObjectUtils;
@@ -73,12 +74,15 @@ public class AuthController {
 @PostMapping("/signin")
 public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest)
 {
+  if (loginRequest.getEmail() == null){
+    return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Email is Null"));
+  }
+  if (loginRequest.getPassword() == null){
+    return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Password is Null"));
+  }
   try {
     // Lấy thông tin người dùng từ cơ sở dữ liệu
     UserDetails user = userDetailsService.loadUserByUsername(loginRequest.getEmail());
-    if(ObjectUtils.isEmpty(user)){
-      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found"));
-    }
     // Kiểm tra mật khẩu đã nhập với mật khẩu đã mã hóa trong cơ sở dữ liệu
     if (!encoder.matches(loginRequest.getPassword(), user.getPassword())) {
       return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found, Password Wrong!"));
@@ -97,29 +101,32 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
             .map(item -> item.getAuthority())
             .collect(Collectors.toList());
 
-    return ResponseEntity.ok(new JwtResponse(
+    return ResponseEntity.ok(new ResponseJson<>(new JwtResponse(
             jwt,
             userDetails.getId(),
             userDetails.getUsername(),
             userDetails.getEmail(),
-            roles));
-  } catch (AuthenticationException e) {
-    return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found"));
+            roles), "login success"));
   }
-
+  catch (UsernameNotFoundException e) {
+    return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found, Email Wrong!"));
+  }
+  catch (AuthenticationException e) {
+    return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found"));
+  }
 }
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
     if (userService.existsByUsername(signUpRequest.getUsername())) {
       return ResponseEntity
           .badRequest()
-          .body(new MessageResponse("Error: Username is already taken!"));
+          .body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Username already exists"));
     }
 
     if (userService.existsByEmail(signUpRequest.getEmail())) {
       return ResponseEntity
           .badRequest()
-          .body(new MessageResponse("Error: Email is already in use!"));
+          .body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Email already exists"));
     }
 
     // Create new user's account
@@ -169,22 +176,36 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
     userService.saveOrupdate(user);
     shoppingCartService.saveShoppingCart(user);
 
-    return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    return ResponseEntity.ok(new MessageResponse("Signup Success"));
   }
 
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public <String, string> Map<String, String> handleValidationExceptions(MethodArgumentNotValidException e){
+//  @ExceptionHandler(MethodArgumentNotValidException.class)
+//  public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException e) {
+//
+//    Map<String, String> errors = new HashMap<>();
+//
+//    e.getBindingResult().getAllErrors().forEach((error) -> {
+//      String fieldName = ((FieldError) error).getField();
+//      String errorMessage = error.getDefaultMessage();
+//
+//      // Kiểm tra trường lỗi và thiết lập thông báo cụ thể
+//      errors.put(fieldName, getValidationErrorMessage(fieldName, errorMessage));
+//    });
+//
+//    // Trả về ResponseJson với danh sách lỗi
+//    return ResponseEntity.badRequest().body(new ResponseJson<>((Object) errors, HttpStatus.BAD_REQUEST, String.valueOf(Boolean.FALSE)));
+//  }
 
-    Map<String, String> errors = new HashMap<>();
-
-    e.getBindingResult().getAllErrors().forEach((error )->{
-      String fieldName = (String) ((FieldError)error ).getField();
-      String errorMessage = (String) error.getDefaultMessage();
-      errors.put(fieldName, errorMessage);
-    });
-
-    return errors;
+  // Hàm phụ để lấy thông báo lỗi chi tiết
+  private String getValidationErrorMessage(String fieldName, String defaultMessage) {
+    if (fieldName.equals("email") && defaultMessage.contains("NotBlank")) {
+      return "Email is Null!";
+    } else if (fieldName.equals("password") && defaultMessage.contains("NotBlank")) {
+      return "Password is Null!";
+    } else {
+      // Giữ nguyên message mặc định cho các lỗi khác
+      return defaultMessage;
+    }
   }
 
 
@@ -229,75 +250,44 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
 
   @PostMapping("forgotPassword")
   public ResponseEntity<?> updatePassword(@Valid @RequestBody updatePassword updatepassword) {
-    UserDetails user = userDetailsService.loadUserByUsername(updatepassword.getEmail());
+    try {
+      UserDetails user = userDetailsService.loadUserByUsername(updatepassword.getEmail());
 
-    if(ObjectUtils.isEmpty(user)) {
-      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Email Not Found"));
+      if (ObjectUtils.isEmpty(user)) {
+        return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Email Not Found"));
+      }
+
+      if (encoder.matches(updatepassword.getPassword(), user.getPassword())) {
+        return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "The new password must be different from the old password"));
+      }
+
+      Optional<User> userOutput = userRepository.findByEmail(updatepassword.getEmail());
+      if (userOutput.isEmpty()) {
+        return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Optional: Email Not Found"));
+      }
+
+      userOutput.get().setPassword(encoder.encode(updatepassword.getPassword()));
+
+      Authentication authentication = authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(updatepassword.getEmail(), updatepassword.getPassword()));
+      String jwt = jwtUtils.generateJwtToken(authentication);
+
+
+      UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+      List<String> roles = userDetails.getAuthorities().stream()
+              .map(item -> item.getAuthority())
+              .collect(Collectors.toList());
+
+      return ResponseEntity.ok(new JwtResponse(
+              jwt,
+              userDetails.getId(),
+              userDetails.getUsername(),
+              userDetails.getEmail(),
+              roles));
     }
-
-    if(encoder.matches(updatepassword.getPassword(), user.getPassword())){
-      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "The new password must be different from the old password"));
+    catch (UsernameNotFoundException e) {
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found, Email Wrong!"));
     }
-
-    Optional<User> userOutput = userRepository.findByEmail(updatepassword.getEmail());
-    if(userOutput.isEmpty()){
-      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Optional: Email Not Found"));
-    }
-
-    userOutput.get().setPassword(encoder.encode(updatepassword.getPassword()));
-
-    Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(updatepassword.getEmail(), updatepassword.getPassword()));
-    String jwt = jwtUtils.generateJwtToken(authentication);
-
-
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    List<String> roles = userDetails.getAuthorities().stream()
-            .map(item -> item.getAuthority())
-            .collect(Collectors.toList());
-
-    return ResponseEntity.ok(new JwtResponse(
-            jwt,
-            userDetails.getId(),
-            userDetails.getUsername(),
-            userDetails.getEmail(),
-            roles));
   }
 
-  @PostMapping("validateOTP")
-  public ResponseEntity<?> validateOTP(@Valid @RequestBody updatePassword updatepassword) {
-    UserDetails user = userDetailsService.loadUserByUsername(updatepassword.getEmail());
-
-    if(ObjectUtils.isEmpty(user)) {
-      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Email Not Found"));
-    }
-
-    if(encoder.matches(updatepassword.getPassword(), user.getPassword())){
-      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "The new password must be different from the old password"));
-    }
-
-    Optional<User> userOutput = userRepository.findByEmail(updatepassword.getEmail());
-    if(userOutput.isEmpty()){
-      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Optional: Email Not Found"));
-    }
-
-    userOutput.get().setPassword(encoder.encode(updatepassword.getPassword()));
-
-    Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(updatepassword.getEmail(), updatepassword.getPassword()));
-    String jwt = jwtUtils.generateJwtToken(authentication);
-
-
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    List<String> roles = userDetails.getAuthorities().stream()
-            .map(item -> item.getAuthority())
-            .collect(Collectors.toList());
-
-    return ResponseEntity.ok(new JwtResponse(
-            jwt,
-            userDetails.getId(),
-            userDetails.getUsername(),
-            userDetails.getEmail(),
-            roles));
-  }
 }

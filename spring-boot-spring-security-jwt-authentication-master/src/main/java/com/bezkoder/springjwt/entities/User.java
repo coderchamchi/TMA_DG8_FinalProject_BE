@@ -56,8 +56,8 @@ public class User {
   @Column(name="status")
   private int status;
 
-//  @Column(name="OTP")
-//  private String OTP;
+  @Column(name="OTP")
+  private String OTP;
 
   @ManyToMany(fetch = FetchType.LAZY) // lấy user thì lấy luôn quyền của nó
   @JoinTable( name = "userrole",

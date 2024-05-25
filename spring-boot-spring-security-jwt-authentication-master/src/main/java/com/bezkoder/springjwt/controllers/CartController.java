@@ -47,9 +47,12 @@ public class CartController {
     private ShoppingCartRepository shoppingCartRepository;
 
     @GetMapping("/all")
-    public ResponseEntity<List<ProductListDTO>> getAllItemInCart() {
+    public ResponseEntity<?> getAllItemInCart() {
         User user = userService.findUserByUserName();
         List<ProductListDTO> listCart = shoppingCartService.getAllItem((user.getUserId()));
+        if(listCart == null){
+            return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.NOT_FOUND, "Nothing to show, It's possible that the user hasn't added the product to the cart"));
+        }
         return new ResponseEntity<List<ProductListDTO>>(listCart, HttpStatus.OK);
     }
 

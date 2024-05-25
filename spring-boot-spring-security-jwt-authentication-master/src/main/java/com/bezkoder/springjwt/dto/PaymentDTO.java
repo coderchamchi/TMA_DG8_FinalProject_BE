@@ -19,8 +19,6 @@ public class PaymentDTO {
 
     private long paymentMethod;
 
-    private String email;
-
     private String address;
 
     private int transportFee;

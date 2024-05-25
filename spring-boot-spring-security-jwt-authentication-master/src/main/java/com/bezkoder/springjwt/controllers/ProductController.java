@@ -108,20 +108,6 @@ public class ProductController {
         }
     }
 
-
-//    @GetMapping("/searchbybrand")
-//    public ResponseEntity<ArrayList<Product>> getproductbybrand(@RequestParam("query") String query){
-//        try {
-//            ArrayList<Product> product = productService.getProdcuctbyBrand(query);
-//            return new ResponseEntity<>(product, HttpStatus.OK);
-//        }
-//        catch (Exception e){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
-
-
-
     @PostMapping("/add")
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseJson<Boolean>> addProduct(@Validated @RequestBody ProductSaveRequest productRequest)

@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface ShoppingCartItemRepository extends JpaRepository<ShoppingCartItem, Long> {
     @Query(
-            value = "SELECT * FROM shopping_cart_item JOIN shopping_cart ON shopping_cart_item.id_shopping_cart = shopping_cart.id_shopping_cart where shopping_cart_item.id_shopping_cart = :id",
+            value = "SELECT * FROM shopping_cart_item JOIN shopping_cart ON shopping_cart_item.id_shopping_cart = shopping_cart.id_shopping_cart where shopping_cart.id_shopping_cart = :id",
             nativeQuery = true
     )
     List<ShoppingCartItem> gelAllItem(long id);

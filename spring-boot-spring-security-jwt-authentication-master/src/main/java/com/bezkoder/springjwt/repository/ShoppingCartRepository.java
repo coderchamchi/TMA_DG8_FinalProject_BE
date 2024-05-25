@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface ShoppingCartRepository extends JpaRepository<ShoppingCart, Long> {
 
     @Query(
-            value = "select * from shopping_cart where status = 1 and id_user = :user",
+            value = "select * from shopping_cart where status = 0 and id_user = :user",
             nativeQuery = true
     )
     ShoppingCart getShoppingCartByUser(long user);
