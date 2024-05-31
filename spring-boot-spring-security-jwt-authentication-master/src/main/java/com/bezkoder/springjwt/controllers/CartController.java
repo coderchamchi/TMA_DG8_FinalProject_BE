@@ -51,7 +51,7 @@ public class CartController {
         User user = userService.findUserByUserName();
         List<ProductListDTO> listCart = shoppingCartService.getAllItem((user.getUserId()));
         if(listCart == null){
-            return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.NOT_FOUND, "Nothing to show, It's possible that the user hasn't added the product to the cart"));
+            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.NOT_FOUND, "Nothing to show, It's possible that the user hasn't added the product to the cart"));
         }
         return new ResponseEntity<List<ProductListDTO>>(listCart, HttpStatus.OK);
     }
@@ -61,17 +61,17 @@ public class CartController {
         if (itemDTO == null) {
             return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Not Found Item and Quantity"));
         } else if (ObjectUtils.isEmpty(itemDTO)){
-            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Not Found Item and Quantity"));
+            return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Not Found Item and Quantity"));
         }
         try {
             User user = userService.findUserByUserName();
             if (ObjectUtils.isEmpty(user)){
-                return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User Not Found"));
+                return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User Not Found"));
             }
             boolean check = shoppingCartService.addItemToCart(itemDTO);
                 if (!check)
                 {
-                    return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Size Or Quantity is null"));
+                    return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Size Or Quantity is null"));
                 }
                 return ResponseEntity.ok().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.OK, "Added a Item into cart for user: "+ user.getEmail()));
         } catch (Exception e) {

@@ -53,6 +53,12 @@ public class Payment {
     @Column(name = "transportFee")
     private int transportFee;
 
+    @Column(name = "fullName")
+    private String fullName;
+
+    @Column(name = "phone")
+    private String phone;
+
     public long getIdPayment() {
         return idPayment;
     }

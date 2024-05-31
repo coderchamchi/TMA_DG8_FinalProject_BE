@@ -44,7 +44,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public boolean savePayment(long user, PaymentDTO paymentDTO) {
-        ShoppingCart cart = shoppingCartRepository.getShoppingCartByUser(user);
+        ShoppingCart cart = shoppingCartRepository.getShoppingCartActiveByUser(user);
         Optional<PaymentMethod> paymentMethod = paymentMethodRepository.findById(paymentDTO.getPaymentMethod());
         Optional<Voucher> voucher = voucherRepository.findById(paymentDTO.getVoucher());
         if (ObjectUtils.isEmpty(paymentDTO) || ObjectUtils.isEmpty(cart) || paymentMethod.isEmpty() || voucher.isEmpty()) {
@@ -59,6 +59,8 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setAddress(paymentDTO.getAddress());
         payment.setCreateDate(LocalDate.now());
         payment.setTransportFee(paymentDTO.getTransportFee());
+        payment.setFullName(paymentDTO.getFullName());
+        payment.setPhone(paymentDTO.getPhone());
         payment.setShoppingCart(cart);
         paymentRepository.save(payment);
         return true;
@@ -95,6 +97,8 @@ public class PaymentServiceImpl implements PaymentService {
         paymentResponse.setAddress(payment.getAddress());
         paymentResponse.setTransportFee(payment.getTransportFee());
         paymentResponse.setProductListDTOS(productListDTO);
+        paymentResponse.setFullName(payment.getFullName());
+        paymentResponse.setPhone(payment.getPhone());
         return paymentResponse;
     }
 

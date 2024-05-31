@@ -58,7 +58,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public List<ProductListDTO> getAllItem(long user) {
-        ShoppingCart cart = shoppingCartRepository.getShoppingCartByUser((user));
+        ShoppingCart cart = shoppingCartRepository.getShoppingCartActiveByUser((user));
         if (cart == null){
             return null;
         }
@@ -79,6 +79,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                         productListDTO.setBase64(tempSize.getProduct().getBase64());
                         productListDTO.setIdProduct(tempSize.getProduct().getIdProduct());
                         productListDTO.setIdCategory(tempSize.getProduct().getCategory().getCategoryId());
+                        productListDTO.setQuantity(item.getQuantity());
                         return productListDTO;
                     }
                     return null;
@@ -105,16 +106,27 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             return false;
         }
         User user = userService.findUserByUserName();
-        Optional<ShoppingCart> shoppingCart = shoppingCartRepository.findById(user.getUserId());
-        if (shoppingCart.isEmpty()) {
-            return false;
-        }
+        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartActiveByUser(user.getUserId());
         Optional<Size> size = sizeService.findByIdSize(shoppingCartItemDTO.getSize());
         if (size.isEmpty()) {
             return false;
         }
+        if (ObjectUtils.isEmpty(shoppingCart)) {
+            ShoppingCart shoppingCartNew = new ShoppingCart();
+            shoppingCartNew.setCreateDate(LocalDate.now());
+            shoppingCartNew.setUser(user);
+            shoppingCartNew.setStatus(1);
+            shoppingCartRepository.save(shoppingCartNew);
+
+            ShoppingCartItem shoppingCartItem = new ShoppingCartItem();
+            shoppingCartItem.setShoppingCart(shoppingCartNew);
+            shoppingCartItem.setSize(size.get());
+            shoppingCartItem.setQuantity(shoppingCartItemDTO.getQuantity());
+            shoppingCartItemRepository.save(shoppingCartItem);
+            return true;
+        }
         ShoppingCartItem shoppingCartItem = new ShoppingCartItem();
-        shoppingCartItem.setShoppingCart(shoppingCart.get());
+        shoppingCartItem.setShoppingCart(shoppingCart);
         shoppingCartItem.setSize(size.get());
         shoppingCartItem.setQuantity(shoppingCartItemDTO.getQuantity());
         shoppingCartItemRepository.save(shoppingCartItem);

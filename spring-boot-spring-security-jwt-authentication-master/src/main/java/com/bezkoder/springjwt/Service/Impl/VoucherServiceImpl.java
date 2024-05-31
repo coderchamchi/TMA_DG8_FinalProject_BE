@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class VoucherServiceImpl implements VoucherService{
@@ -14,5 +15,10 @@ public class VoucherServiceImpl implements VoucherService{
     @Override
     public List<Voucher> getAll() {
         return voucherRepository.findAll();
+    }
+
+    @Override
+    public Optional<Voucher> getProductbyid(long id) {
+        return voucherRepository.findById(id);
     }
 }

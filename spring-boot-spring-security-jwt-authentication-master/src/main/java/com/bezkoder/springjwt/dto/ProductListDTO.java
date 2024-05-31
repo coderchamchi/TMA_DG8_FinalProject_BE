@@ -24,4 +24,6 @@ public class ProductListDTO {
 
     private long idCategory;
 
+    private int quantity;
+
 }

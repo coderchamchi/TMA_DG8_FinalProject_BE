@@ -22,4 +22,9 @@ public class PaymentDTO {
     private String address;
 
     private int transportFee;
+
+    private String fullName;
+
+    private String phone;
+
 }

@@ -23,4 +23,8 @@ public class PaymentResponse {
     private int transportFee;
 
     private List<ProductListDTO> productListDTOS;
+
+    private String fullName;
+
+    private String phone;
 }

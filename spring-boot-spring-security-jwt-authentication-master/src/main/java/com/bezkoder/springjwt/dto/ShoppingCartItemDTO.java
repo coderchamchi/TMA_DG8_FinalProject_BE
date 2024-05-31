@@ -19,7 +19,6 @@ import javax.validation.constraints.NotNull;
 public class ShoppingCartItemDTO {
 
     @Valid
-
     @NotNull(message = "idSize not be null")
     private long size;
 

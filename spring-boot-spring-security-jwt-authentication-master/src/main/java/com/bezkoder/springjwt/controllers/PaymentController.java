@@ -13,10 +13,12 @@ import com.bezkoder.springjwt.repository.ShoppingCartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,21 +39,23 @@ public class PaymentController {
     private ShoppingCartRepository shoppingCartRepository;
 
     @GetMapping("/user")
-    public  ResponseEntity<ResponseJson<PaymentResponse>> getPayment(){
+    public  ResponseEntity<ResponseJson<ArrayList<PaymentResponse>>> getPayment(){
         User user = userService.findUserByUserName();
-        ShoppingCart cart = shoppingCartRepository.getShoppingCartByUser(user.getUserId());
-        if(cart == null){
+        ArrayList<PaymentResponse> paymentResponses =  new ArrayList<>();
+
+        ArrayList<ShoppingCart> carts = shoppingCartRepository.getShoppingCartInActiveByUser(user.getUserId());
+        if(ObjectUtils.isEmpty(carts)){
             return ResponseEntity.badRequest().body(new ResponseJson<>("Cart isn't found" ));
         }
-        Optional<ShoppingCart> shoppingCart = shoppingCartRepository.findById(cart.getIdShoppingCart());
-        if (shoppingCart.isEmpty()){
-            return ResponseEntity.badRequest().body(new ResponseJson<>("Cart isn't found" ));
+        carts.forEach( item -> {
+            PaymentResponse paymentResponse = paymentService.findById(item.getIdShoppingCart());
+            paymentResponses.add(paymentResponse);
+        });
+        if(ObjectUtils.isEmpty(paymentResponses)){
+            return ResponseEntity.badRequest().body(new ResponseJson<>("Payment isn't found" ));
         }
-        PaymentResponse paymentResponse =  paymentService.findById(shoppingCart.get().getIdShoppingCart());
-        if(ObjectUtils.isEmpty(paymentResponse)){
-            return ResponseEntity.ok().body(new ResponseJson<>("Payment isn't found" ));
-        }
-        return ResponseEntity.ok().body(new ResponseJson<>(paymentResponse, HttpStatus.ACCEPTED, "Success"));
+        return ResponseEntity.ok().body(new ResponseJson<>(paymentResponses, HttpStatus.ACCEPTED, "Success"));
+
     }
 
     @PostMapping("/save")
@@ -68,7 +72,7 @@ public class PaymentController {
     }
 
     @PatchMapping("/update/{id}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Payment> updateproductbypatch(@PathVariable long id, @RequestBody Map<String,Object> fields){
         Payment payment= paymentService.updatePayment(id, fields);
         if(payment != null){
