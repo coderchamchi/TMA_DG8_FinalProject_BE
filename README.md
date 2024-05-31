@@ -10,5 +10,8 @@ Frameworks and Tools
 	•	MySQL
 
 	•	Maven
+ 
+	•	Stmp Gmail
 
+ 	•	Spring Security
 
