@@ -1,14 +1,17 @@
 package com.bezkoder.springjwt.Service.Impl;
 
 import com.bezkoder.springjwt.constant.WebUnit;
-import com.bezkoder.springjwt.dto.updatePassword;
+import com.bezkoder.springjwt.entities.Product;
 import com.bezkoder.springjwt.entities.User;
 import com.bezkoder.springjwt.Service.UserService;
 import com.bezkoder.springjwt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -67,6 +70,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<String> getAllEmail() {
         return userRepository.GetAllEmail();
+    }
+
+    @Override
+    public User updatebypatch(long id, Map<String, Object> fields) {
+        Optional<User> existingUser = userRepository.findById(id);
+
+        if(existingUser.isPresent()){
+            fields.forEach((key, value)->
+            {
+                Field field = ReflectionUtils.findField(User.class, key);
+                field.setAccessible(true);
+                ReflectionUtils.setField(field, existingUser.get(), value);
+            });
+            return userRepository.save(existingUser.get());
+        }
+        return null;
     }
 }
 

@@ -36,6 +36,7 @@
 			<artifactId>commons-configuration</artifactId>
 			<version>1.10</version>
 		</dependency>
+
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -125,9 +126,15 @@
             <version>6.2.6.Final</version>
         </dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
     </dependencies>
 
 	<build>
+		<finalName>r2s-100NgayHa-store</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

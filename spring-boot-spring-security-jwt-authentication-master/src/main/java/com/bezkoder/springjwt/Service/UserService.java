@@ -1,9 +1,11 @@
 package com.bezkoder.springjwt.Service;
 
 import com.bezkoder.springjwt.dto.updatePassword;
+import com.bezkoder.springjwt.entities.Product;
 import com.bezkoder.springjwt.entities.User;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface UserService {
@@ -25,4 +27,6 @@ public interface UserService {
     List<String> getAllUsername();
 
     List<String> getAllEmail();
+
+    User updatebypatch(long id, Map<String, Object> fields);
 }

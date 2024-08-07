@@ -1,12 +1,8 @@
 package com.bezkoder.springjwt.controllers;
 
-import com.bezkoder.springjwt.Service.Impl.VoucherService;
-import com.bezkoder.springjwt.Service.PaymentMethodService;
-import com.bezkoder.springjwt.dto.ProductDetailById;
+import com.bezkoder.springjwt.Service.VoucherService;
 import com.bezkoder.springjwt.dto.ResponseJson;
-import com.bezkoder.springjwt.entities.PaymentMethod;
 import com.bezkoder.springjwt.entities.Voucher;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

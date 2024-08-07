@@ -3,6 +3,7 @@ package com.bezkoder.springjwt.controllers;
 import com.bezkoder.springjwt.Service.PaymentService;
 import com.bezkoder.springjwt.Service.ShoppingCartService;
 import com.bezkoder.springjwt.Service.UserService;
+import com.bezkoder.springjwt.config.jwt.AuthEntryPointJwt;
 import com.bezkoder.springjwt.dto.PaymentDTO;
 import com.bezkoder.springjwt.dto.ResponseJson;
 import com.bezkoder.springjwt.entities.Payment;
@@ -10,11 +11,14 @@ import com.bezkoder.springjwt.entities.PaymentResponse;
 import com.bezkoder.springjwt.entities.ShoppingCart;
 import com.bezkoder.springjwt.entities.User;
 import com.bezkoder.springjwt.repository.ShoppingCartRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +30,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("ProjectSJ/Payment")
 public class PaymentController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
+
     @Autowired
     private PaymentService paymentService;
 
@@ -49,7 +56,9 @@ public class PaymentController {
         }
         carts.forEach( item -> {
             PaymentResponse paymentResponse = paymentService.findById(item.getIdShoppingCart());
-            paymentResponses.add(paymentResponse);
+            if(paymentResponse != null){
+                paymentResponses.add(paymentResponse);
+            }
         });
         if(ObjectUtils.isEmpty(paymentResponses)){
             return ResponseEntity.badRequest().body(new ResponseJson<>("Payment isn't found" ));
@@ -60,13 +69,15 @@ public class PaymentController {
 
     @PostMapping("/save")
     public ResponseEntity<ResponseJson<Boolean>> savePayment(@RequestBody PaymentDTO paymentDTO){
-        User user = userService.findUserByUserName();
-        if (ObjectUtils.isEmpty(user)){
-            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "User isn't Found"));
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(principal.equals("anonymousUser")){
+            logger.error("User haven't SignIn");
+            return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Haven't SignIn"));
         }
+        User user = userService.findUserByUserName();
         boolean check = paymentService.savePayment(user.getUserId(), paymentDTO);
         if (!check){
-            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "PaymentMethod or Voucher isn't Found"));
+            return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "PaymentMethod or Voucher isn't Found"));
         }
         return ResponseEntity.ok().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.ACCEPTED, "Success"));
     }

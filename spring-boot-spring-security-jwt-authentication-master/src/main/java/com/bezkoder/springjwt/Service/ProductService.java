@@ -54,6 +54,8 @@ public interface ProductService {
 
     Page<Product> getPagging(Pageable pageable);
 
+    List<ProductListDTO> GetAllProduct_IdOdd();
+
     List<ProductListDTO> getProductsRelation(long id);
 
     List<ProductListDTO> getProductSortByPrice();

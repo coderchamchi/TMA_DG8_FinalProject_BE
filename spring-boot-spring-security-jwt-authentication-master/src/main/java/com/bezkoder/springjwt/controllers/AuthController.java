@@ -11,10 +11,15 @@ import com.bezkoder.springjwt.Service.RoleService;
 import com.bezkoder.springjwt.Service.ShoppingCartService;
 import com.bezkoder.springjwt.Service.UserService;
 
+import com.bezkoder.springjwt.config.jwt.AuthEntryPointJwt;
 import com.bezkoder.springjwt.dto.ResponseJson;
 import com.bezkoder.springjwt.dto.UserDTO;
 import com.bezkoder.springjwt.dto.updatePassword;
+import com.bezkoder.springjwt.entities.Product;
+import com.bezkoder.springjwt.exception.ErrorResponse;
 import com.bezkoder.springjwt.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +54,9 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+  private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
+
   @Autowired
   AuthenticationManager authenticationManager;
   @Autowired
@@ -73,6 +81,9 @@ public class AuthController {
 
 @PostMapping("/signin")
 public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest)
+//        Tại sao lại chọn kiểu trả về là <>/ Kiểu Generic Data
+//        --> Vì sau này làm việc với FE, làm ở Swagger, chọn kiểu Generic để Swagger tự động biết phần example value
+//        luôn, FE dựa vào đó code và kết hợp FE với BE thuận lợi hơn
 {
   if (loginRequest.getEmail() == null){
     return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Email is Null"));
@@ -117,6 +128,21 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
 }
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+
+
+    if (signUpRequest.getEmail() == null){
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Email is Null"));
+    }
+    if (signUpRequest.getUsername() == null){
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Username is Null"));
+    }
+    if (signUpRequest.getBirthday() == null){
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Birthday is Null"));
+    }
+    if (signUpRequest.getPassword() == null){
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Password is Null"));
+    }
+
     if (userService.existsByUsername(signUpRequest.getUsername())) {
       return ResponseEntity
           .badRequest()
@@ -176,25 +202,27 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
     userService.saveOrupdate(user);
     shoppingCartService.saveShoppingCart(user);
 
-    return ResponseEntity.ok(new MessageResponse("Signup Success"));
+    return ResponseEntity
+            .ok()
+            .body(new ResponseJson<>(Boolean.TRUE, HttpStatus.CREATED, "Signup Successfully"));
   }
 
-//  @ExceptionHandler(MethodArgumentNotValidException.class)
-//  public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException e) {
-//
-//    Map<String, String> errors = new HashMap<>();
-//
-//    e.getBindingResult().getAllErrors().forEach((error) -> {
-//      String fieldName = ((FieldError) error).getField();
-//      String errorMessage = error.getDefaultMessage();
-//
-//      // Kiểm tra trường lỗi và thiết lập thông báo cụ thể
-//      errors.put(fieldName, getValidationErrorMessage(fieldName, errorMessage));
-//    });
-//
-//    // Trả về ResponseJson với danh sách lỗi
-//    return ResponseEntity.badRequest().body(new ResponseJson<>((Object) errors, HttpStatus.BAD_REQUEST, String.valueOf(Boolean.FALSE)));
-//  }
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException e) {
+
+    Map<String, String> errors = new HashMap<>();
+
+    e.getBindingResult().getAllErrors().forEach((error) -> {
+      String fieldName = ((FieldError) error).getField();
+      String errorMessage = error.getDefaultMessage();
+
+      // Kiểm tra trường lỗi và thiết lập thông báo cụ thể
+      errors.put(fieldName, getValidationErrorMessage(fieldName, errorMessage));
+    });
+
+    // Trả về ResponseJson với danh sách lỗi
+    return ResponseEntity.badRequest().body(new ResponseJson<>((Object) errors, HttpStatus.BAD_REQUEST, String.valueOf(Boolean.FALSE)));
+  }
 
   // Hàm phụ để lấy thông báo lỗi chi tiết
   private String getValidationErrorMessage(String fieldName, String defaultMessage) {
@@ -222,22 +250,51 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
       userService.saveOrupdate(user);
       return ResponseEntity.ok().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.OK, "Update User Success"));
   }
+
+  @PatchMapping("/update/patch/{id}")
+  public ResponseEntity<?> updateUserByPatch
+          (@PathVariable("id") Long id, @RequestBody Map<String,Object> fields )
+  {
+    User user= userService.updatebypatch(id, fields);
+    if(user != null){
+      return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
+    }
+    else
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+  }
+
   @GetMapping("/all")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-  public ResponseEntity<List<User>> getallUser(){
-      List<User> listuser = userService.getalluser();
-    return new ResponseEntity<List<User>>(listuser, HttpStatus.OK);
+  public ResponseEntity<List<User>> getAllUser(){
+      List<User> listUser = userService.getalluser();
+    return new ResponseEntity<List<User>>(listUser, HttpStatus.OK);
   }
-  @GetMapping("/user")//thong tin tra ve FE
-  public ResponseEntity<Object> getuser(){
+
+  @GetMapping("/user")
+  public ResponseEntity<Object> getUser(){
     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if(principal.equals("anonymousUser")){
+      logger.error("User haven't SignIn");
+      return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Haven't SignIn"));
+    }
     return new ResponseEntity<>(principal, HttpStatus.OK);
   }
+
+  @GetMapping("/getAuth")
+  public ResponseEntity<Object> getAuthenticationManager() {
+    Object principal = SecurityContextHolder.getContext().getAuthentication();
+    if(ObjectUtils.isEmpty(principal)){
+      return new ResponseEntity<>((Object) "Null", HttpStatus.NOT_FOUND);
+    }
+    return new ResponseEntity<>(principal, HttpStatus.OK);
+  }
+
   @GetMapping("/userinfo")//thong tin chi tiet, cac field co trong entity user
-  public ResponseEntity<User> getinfouser(){
+  public ResponseEntity<User> getInfoUser(){
     User user = userService.findUserByUserName();
     return new ResponseEntity<User>(user, HttpStatus.OK);
   }
+
   @GetMapping("listUsername")
   public List<String> getListUsername(){
     return userService.getAllUsername();
@@ -278,12 +335,12 @@ public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest login
               .map(item -> item.getAuthority())
               .collect(Collectors.toList());
 
-      return ResponseEntity.ok(new JwtResponse(
+      return ResponseEntity.ok(new ResponseJson<>(new JwtResponse(
               jwt,
               userDetails.getId(),
               userDetails.getUsername(),
               userDetails.getEmail(),
-              roles));
+              roles), "update password success"));
     }
     catch (UsernameNotFoundException e) {
       return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "User Not Found, Email Wrong!"));

@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL) //khi data nào mà rỗng thì sẽ không hiển thị, nhìn respone không có null, trông đẹp hơn
 public class ResponseJson<T> implements Serializable {
 
     /**
@@ -29,7 +29,7 @@ public class ResponseJson<T> implements Serializable {
     }
 
     public ResponseJson(String message, T data, SysError sysError, HttpStatus status) {
-        super();
+        super(); // lay ra instance cua lop cha, mà ở đây có thấy nó extend đâu nhỉ
         this.message = message;
         this.data = data;
         this.sysError = sysError;

@@ -2,10 +2,13 @@ package com.bezkoder.springjwt.controllers;
 
 import com.bezkoder.springjwt.Service.CategoryService;
 import com.bezkoder.springjwt.Service.UserService;
+import com.bezkoder.springjwt.config.jwt.AuthEntryPointJwt;
 import com.bezkoder.springjwt.dto.*;
 import com.bezkoder.springjwt.entities.Product;
 import com.bezkoder.springjwt.Service.ProductService;
 import org.apache.commons.lang3.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,10 +42,19 @@ public class ProductController {
     @Autowired
     UserService userService;
 
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
+
+
     @GetMapping("/all")
     public ResponseEntity<List<ProductListDTO>> getAllProduct() {
         List<ProductListDTO> listProduct = productService.GetAllProduct();
         return new ResponseEntity<List<ProductListDTO>>(listProduct, HttpStatus.OK);
+    }
+
+    @GetMapping("/listProductIdIsOdd")
+    public ResponseEntity<List<ProductListDTO>> getAllProductIdIsOdd(){
+        List<ProductListDTO> productListDTOS = productService.GetAllProduct_IdOdd();
+        return new ResponseEntity<List<ProductListDTO>>(productListDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -106,7 +118,6 @@ public class ProductController {
     }
 
     @PostMapping("/add")
-//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseJson<Boolean>> addProduct(@Validated @RequestBody ProductSaveRequest productRequest)
                                                             //sử dụng @RBody để nó tự động convert JSON thành đối tượng DTO
                                                             //sử dụng @Validated để check xem những trường bên entity cấu hình
@@ -121,18 +132,31 @@ public class ProductController {
             }
         }
         if (!checkAuth) {
-            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.FORBIDDEN, "Error: User has not Permission"));
+            logger.error("Error: User has not Permission");
+            return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.FORBIDDEN, "Error: User has not Permission"));
         }
         boolean check = productService.saveProduct(productRequest);
         if(!check){
-            return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error: Can not add the product"));
+            logger.error("Error: Can not add the product");
+            return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error: Can not add the product"));
         }
         return ResponseEntity.ok().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.OK, "Add Successed"));
     }
 
     @PutMapping("/update/{id}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseJson<Boolean>> updateProduct(@PathVariable("id") Long id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean checkAuth = false;
+        for(GrantedAuthority role : auth.getAuthorities()){
+            if(role.toString().equals(String.valueOf(ROLE_ADMIN))){
+                checkAuth = true;
+            }
+        }
+        if (!checkAuth) {
+            return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.FORBIDDEN, "Error: User has not Permission"));
+        }
         boolean updateProductbyid = productService.deleteProductbyid(id);
         if (!updateProductbyid){
             return ResponseEntity.ok().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.NOT_FOUND, "Not Found The Product"));
@@ -151,16 +175,26 @@ public class ProductController {
 //        return ResponseEntity.ok().body(new ResponseJson<>(Boolean.TRUE, HttpStatus.OK, "Update Success"));
 //    }
 
-//    @PatchMapping("/update/{id}")
-//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-//    public ResponseEntity<Product> updateproductbypatch(@PathVariable long id, @RequestBody Map<String,Object> fields){
-//        Product product= productService.updatebypatch(id, fields);
-//        if(product != null){
-//            return new ResponseEntity<>(product, HttpStatus.ACCEPTED);
-//        }
-//        else
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//    }
+    @PatchMapping("/update/{id}")
+    public ResponseEntity<?> updateproductbypatch(@PathVariable long id, @RequestBody Map<String,Object> fields){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean checkAuth = false;
+        for(GrantedAuthority role : auth.getAuthorities()){
+            if(role.toString().equals(String.valueOf(ROLE_ADMIN))){
+                checkAuth = true;
+            }
+        }
+        if (!checkAuth) {
+            return ResponseEntity.badRequest().body(new ResponseJson<>(Boolean.FALSE, HttpStatus.FORBIDDEN, "Error: User has not Permission"));
+        }
+        Product product= productService.updatebypatch(id, fields);
+        if(product != null){
+            return new ResponseEntity<>(product, HttpStatus.ACCEPTED);
+        }
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
 //    @DeleteMapping("/delete/{id}")
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN')")

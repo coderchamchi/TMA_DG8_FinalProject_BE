@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -58,6 +59,38 @@ public class ProductServiceImpl implements ProductService {
         return listProducts;
     }
 
+    /**
+     * Day la mot doan code nho de noi ve filter trong lambda,
+     * filter o trong doan code nay muc dich loc ra nhung san pham co id la so le
+     * */
+    @Override
+    public List<ProductListDTO> GetAllProduct_IdOdd() {
+        List<ProductListDTO> listProductsDTO = new ArrayList<>();
+
+        List<Product> listProducts = productRepository.GetAllProduct();
+
+        Stream<Product> listProduct_idOdd = listProducts.stream().filter(
+                item -> item.getIdProduct() %2 != 0
+        );
+
+        listProduct_idOdd.forEach(item -> {
+            Optional<Size> size = sizeRepository.findByIdProduct(item.getIdProduct()).stream().findFirst();
+            if (size.isPresent()) {
+                ProductListDTO productListDTO = new ProductListDTO(); // Tạo đối tượng mới bên trong lambda
+                productListDTO.setPrice(size.get().getPrice());
+                productListDTO.setProductName(item.getProductName());
+                productListDTO.setProductDescription(item.getProductDescription());
+                productListDTO.setBase64(item.getBase64());
+                productListDTO.setIdProduct(item.getIdProduct());
+                productListDTO.setIdCategory(item.getCategory().getCategoryId());
+                listProductsDTO.add(productListDTO); // Thêm đối tượng vào danh sách
+            }
+        });
+
+        return listProductsDTO;
+    }
+
+
     @Override
     public List<ProductListDTO> getProductsRelation(long id) {
         Optional<Product> product = productRepository.findById(id);
@@ -79,7 +112,8 @@ public class ProductServiceImpl implements ProductService {
                         productListDTO.setIdCategory(item.getCategory().getCategoryId());
                         listProducts.add(productListDTO); // Thêm đối tượng vào danh sách
                     }
-                });
+                }
+                );
                 return listProducts;
             }
             return null;

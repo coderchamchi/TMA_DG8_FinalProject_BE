@@ -1,4 +1,4 @@
-package com.bezkoder.springjwt.Service.Impl;
+package com.bezkoder.springjwt.Service;
 
 import com.bezkoder.springjwt.entities.Voucher;
 
